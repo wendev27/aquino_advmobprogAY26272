@@ -1,0 +1,49 @@
+# Flutter/Dart/Pub
+.dart_tool/
+.packages
+.packages.lock
+.pub/
+.pub-cache/
+pubspec.lock
+
+# Build outputs
+build/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+android/.gradle/
+**/generated_plugin_registrant.dart
+
+# Xcode
+*.xcworkspace
+*.xcuserstate
+*.xcuserdata
+*.xcconfig
+
+# IntelliJ / Android Studio
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# Assets
+.flutter-plugins
+.flutter-plugins-dependencies
+.metadata
+
+# Ignore build outputs and intermediate files
+.flutter-plugins
+.packages
+
+# Others
+*.keystore
+*.jks
+*.lock
