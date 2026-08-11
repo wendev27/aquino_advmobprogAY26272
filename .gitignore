@@ -47,3 +47,6 @@ android/.gradle/
 *.keystore
 *.jks
 *.lock
+
+# Environment variables
+.env

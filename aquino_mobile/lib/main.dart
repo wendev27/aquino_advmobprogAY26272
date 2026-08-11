@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'providers/theme_provider.dart';
 import 'providers/counter_provider.dart';
 import 'screens/home_screen.dart';
@@ -10,7 +11,10 @@ import 'screens/dual_counter_screen.dart';
 // Responsibilities: Initialize app, set up providers, and configure theme
 // Why this file exists: To bootstrap the application with all necessary configurations
 
-void main() {
+void main() async {
+  // Load environment variables from .env file
+  await dotenv.load(fileName: ".env");
+  
   // Run the Flutter app
   runApp(const MyApp());
 }
