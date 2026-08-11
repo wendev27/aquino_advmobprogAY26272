@@ -50,3 +50,28 @@ android/.gradle/
 
 # Environment variables
 .env
+
+# Additional common Flutter ignores
+coverage/
+.dart_tool/
+
+# Android specific
+android/local.properties
+android/**/gradle-wrapper.jar
+android/.gradle
+android/captures/
+android/gradlew
+android/gradlew.bat
+android/app/release/
+
+# iOS specific
+ios/Pods/
+ios/.symlinks/
+ios/profile/
+ios/DerivedData/
+ios/Runner.xcworkspace/xcuserdata
+
+# Misc
+*.swp
+*.swo
+*~
