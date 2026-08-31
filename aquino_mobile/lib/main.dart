@@ -7,6 +7,9 @@ import 'screens/home_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/dual_counter_screen.dart';
 import 'screens/cart_screen.dart';
+import 'screens/profile_screen.dart';
+import 'screens/splash_screen.dart';
+import 'screens/signin_screen.dart';
 
 // Purpose: Entry point of the Flutter application
 // Responsibilities: Initialize app, set up providers, and configure theme
@@ -70,8 +73,14 @@ class MyApp extends StatelessWidget {
             // Use theme mode from ThemeProvider
             themeMode: themeProvider.themeMode,
             
-            // Home screen is the initial route
-            home: const MainNavigation(),
+            // Route-based navigation with auth flow
+            initialRoute: '/splash',
+            routes: {
+              '/splash': (context) => const SplashScreen(),
+              '/signin': (context) => const SigninScreen(),
+              '/home': (context) => const MainNavigation(),
+              '/settings': (context) => const SettingsScreen(),
+            },
           );
         },
       ),
@@ -100,6 +109,7 @@ class _MainNavigationState extends State<MainNavigation> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const CartScreen(),
+    const ProfileScreen(),
     const DualCounterScreen(),
     const SettingsScreen(),
   ];
@@ -134,6 +144,11 @@ class _MainNavigationState extends State<MainNavigation> {
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_cart),
             label: 'Cart',
+          ),
+          // Profile tab
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
           ),
           // Counter tab
           BottomNavigationBarItem(

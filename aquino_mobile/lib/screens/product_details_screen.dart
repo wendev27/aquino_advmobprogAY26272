@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../constants.dart';
 import '../models/product.dart';
 import '../services/cart_service.dart';
+import '../services/user_service.dart';
 
 // Purpose: Display detailed information about a single product
 // Responsibilities: Show product image, description, price, rating, and category
@@ -113,8 +114,12 @@ class ProductDetailsScreen extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () async {
                         try {
+                          final userService = UserService();
+                          final userData = await userService.getUserData();
+                          final userId = userData['id'] as int? ?? currentUserId;
+                          
                           await CartService().addToCart(
-                            currentUserId,
+                            userId,
                             [
                               {'id': product.id, 'quantity': 1},
                             ],
