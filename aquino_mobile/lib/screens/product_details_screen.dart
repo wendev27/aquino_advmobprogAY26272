@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../constants.dart';
 import '../models/product.dart';
+import '../services/cart_service.dart';
 
 // Purpose: Display detailed information about a single product
 // Responsibilities: Show product image, description, price, rating, and category
@@ -83,6 +85,12 @@ class ProductDetailsScreen extends StatelessWidget {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 4),
+                  // Brand and stock
+                  Text(
+                    '${product.brand} · Stock: ${product.stock}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                   const SizedBox(height: 24),
                   // Divider
                   const Divider(),
@@ -99,21 +107,34 @@ class ProductDetailsScreen extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 24),
-                  // Add to cart button (placeholder)
+                  // Add to cart button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        // Show snackbar as feedback
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Added ${product.title} to cart'),
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
+                      onPressed: () async {
+                        try {
+                          await CartService().addToCart(
+                            currentUserId,
+                            [
+                              {'id': product.id, 'quantity': 1},
+                            ],
+                          );
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Added to cart')),
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Failed to add: $e')),
+                            );
+                          }
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: Colors.amber,
                       ),
                       child: const Text('Add to Cart'),
                     ),

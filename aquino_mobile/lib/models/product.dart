@@ -23,6 +23,15 @@ class Product {
   
   // Rating of the product
   final double rating;
+  
+  // Brand of the product
+  final String brand;
+  
+  // Stock quantity
+  final int stock;
+  
+  // Discount percentage
+  final double discountPercentage;
 
   // Constructor for Product
   // Inputs: All required product fields
@@ -35,6 +44,9 @@ class Product {
     required this.thumbnail,
     required this.category,
     required this.rating,
+    this.brand = '',
+    this.stock = 0,
+    this.discountPercentage = 0.0,
   });
 
   // Factory constructor to create Product from JSON
@@ -50,6 +62,9 @@ class Product {
       thumbnail: json['thumbnail'] as String,
       category: json['category'] as String,
       rating: (json['rating'] as num).toDouble(),
+      brand: json['brand'] ?? '',
+      stock: json['stock'] ?? 0,
+      discountPercentage: (json['discountPercentage'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
@@ -65,6 +80,9 @@ class Product {
       'thumbnail': thumbnail,
       'category': category,
       'rating': rating,
+      'brand': brand,
+      'stock': stock,
+      'discountPercentage': discountPercentage,
     };
   }
 }

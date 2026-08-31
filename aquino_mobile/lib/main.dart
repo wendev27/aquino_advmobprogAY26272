@@ -6,6 +6,7 @@ import 'providers/counter_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/dual_counter_screen.dart';
+import 'screens/cart_screen.dart';
 
 // Purpose: Entry point of the Flutter application
 // Responsibilities: Initialize app, set up providers, and configure theme
@@ -98,6 +99,7 @@ class _MainNavigationState extends State<MainNavigation> {
   // Why this exists: To easily map tab index to screen
   final List<Widget> _screens = [
     const HomeScreen(),
+    const CartScreen(),
     const DualCounterScreen(),
     const SettingsScreen(),
   ];
@@ -127,6 +129,11 @@ class _MainNavigationState extends State<MainNavigation> {
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
+          ),
+          // Cart tab
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_cart),
+            label: 'Cart',
           ),
           // Counter tab
           BottomNavigationBarItem(
