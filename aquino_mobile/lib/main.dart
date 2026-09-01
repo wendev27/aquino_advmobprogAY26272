@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'constants.dart';
 import 'providers/theme_provider.dart';
 import 'providers/counter_provider.dart';
 import 'screens/home_screen.dart';
@@ -82,7 +83,13 @@ class MyApp extends StatelessWidget {
             routes: {
               '/splash': (context) => const SplashScreen(),
               '/signin': (context) => const SigninScreen(),
-              '/home': (context) => const MainNavigation(),
+              '/home': (context) {
+                final args = ModalRoute.of(context)?.settings.arguments;
+                final userId = args is Map<String, dynamic>
+                    ? (args['id'] as int? ?? currentUserId)
+                    : currentUserId;
+                return MainNavigation(userId: userId);
+              },
               '/settings': (context) => const SettingsScreen(),
             },
           );
@@ -97,8 +104,10 @@ class MyApp extends StatelessWidget {
 // Responsibilities: Manage navigation state and display appropriate screen
 // Why this class exists: To provide navigation between Home and Settings screens
 class MainNavigation extends StatefulWidget {
+  final int userId;
+
   // Constructor for MainNavigation
-  const MainNavigation({super.key});
+  const MainNavigation({super.key, this.userId = currentUserId});
 
   @override
   State<MainNavigation> createState() => _MainNavigationState();
@@ -110,11 +119,11 @@ class _MainNavigationState extends State<MainNavigation> {
 
   // List of screens for navigation
   // Why this exists: To easily map tab index to screen
-  final List<Widget> _screens = [
+  late final List<Widget> _screens = [
     const HomeScreen(),
     // Lab 3 adds the cart tab to the main app shell so users can move between
     // the product list and the shopping cart without leaving the navigation flow.
-    const CartScreen(),
+    CartScreen(userId: widget.userId),
     const ProfileScreen(),
     const DualCounterScreen(),
     const SettingsScreen(),

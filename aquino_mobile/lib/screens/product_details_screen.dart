@@ -119,8 +119,10 @@ class ProductDetailsScreen extends StatelessWidget {
                           // HTTP call directly in the screen.
                           final userService = UserService();
                           final userData = await userService.getUserData();
+                          // Use the authenticated user's ID so the cart request is scoped
+                          // to the same account currently signed in.
                           final userId = userData['id'] as int? ?? currentUserId;
-                          
+
                           await CartService().addToCart(
                             userId,
                             [
