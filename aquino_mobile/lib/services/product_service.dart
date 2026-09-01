@@ -85,10 +85,10 @@ class ProductService {
 
       // Check if request was successful
       if (response.statusCode == 200) {
-        // Parse the JSON response
+        // The product details endpoint returns a single object instead of a list,
+        // so we convert one JSON map into one Product instance here.
         final Map<String, dynamic> jsonData = json.decode(response.body);
         
-        // Convert JSON to Product object
         return Product.fromJson(jsonData);
       } else {
         // Throw exception for unsuccessful status code

@@ -114,6 +114,8 @@ class ProductDetailsScreen extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () async {
                         try {
+                          // The app reads the stored user id before adding the product to
+                          // the cart so the cart is scoped to the logged-in user.
                           final userService = UserService();
                           final userData = await userService.getUserData();
                           final userId = userData['id'] as int? ?? currentUserId;

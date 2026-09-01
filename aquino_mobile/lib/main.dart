@@ -34,11 +34,13 @@ class MyApp extends StatelessWidget {
     // MultiProvider allows multiple providers to be used in the app
     return MultiProvider(
       providers: [
-        // ThemeProvider for app-wide theme management
+        // ThemeProvider is app-wide state for the dark/light setting.
+        // Every screen that needs the theme can read it from this provider.
         ChangeNotifierProvider(
           create: (_) => ThemeProvider(),
         ),
-        // CounterProvider for app-wide counter state
+        // CounterProvider shows the "app state" idea from the lab:
+        // the value survives across navigation, unlike local setState() data.
         ChangeNotifierProvider(
           create: (_) => CounterProvider(),
         ),
@@ -70,10 +72,12 @@ class MyApp extends StatelessWidget {
               useMaterial3: true,
             ),
             
-            // Use theme mode from ThemeProvider
+            // The current theme mode comes from provider state, so changing it
+            // updates the whole app without manually passing a value through widgets.
             themeMode: themeProvider.themeMode,
             
-            // Route-based navigation with auth flow
+            // The app starts at the splash screen to check whether the user is
+            // already logged in before showing the protected parts of the app.
             initialRoute: '/splash',
             routes: {
               '/splash': (context) => const SplashScreen(),

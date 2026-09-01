@@ -17,7 +17,8 @@ class SettingsScreen extends StatelessWidget {
         title: const Text('Settings'),
       ),
       body: Consumer<ThemeProvider>(
-        // Rebuild when theme provider changes
+        // When ThemeProvider notifies listeners, this screen rebuilds automatically.
+        // That is the core Provider pattern in action: UI updates from shared state.
         builder: (context, themeProvider, child) {
           return ListView(
             children: [

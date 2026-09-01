@@ -53,7 +53,9 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       List<Product> products;
       
-      // Use search API if there's a query, otherwise fetch all products
+      // The search query is checked here before making the API call.
+      // If the user typed a keyword, the app uses the server-side search endpoint;
+      // otherwise it loads the full catalog from the products endpoint.
       if (_searchQuery.isNotEmpty) {
         products = await _productService.searchProducts(_searchQuery);
       } else {

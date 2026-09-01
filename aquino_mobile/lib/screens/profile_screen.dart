@@ -26,6 +26,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   // Handle logout process
   Future<void> _logout() async {
+    // Clearing SharedPreferences removes the saved login session, and then the app
+    // forces navigation back to the sign-in screen.
     await _userService.logout();
     if (!mounted) return;
     Navigator.pushNamedAndRemoveUntil(context, '/signin', (route) => false);

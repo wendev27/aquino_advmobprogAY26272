@@ -28,6 +28,9 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   double _lineTotal(CartProduct item) {
+    // This calculates the current item total using the local quantity map.
+    // The discount is applied to the line total so the UI reflects the real price
+    // the customer would pay for that item.
     final qty = _quantities[item.id] ?? item.quantity;
     final rawTotal = item.price * qty;
     return rawTotal - (rawTotal * item.discountPercentage / 100);
@@ -59,6 +62,8 @@ class _CartScreenState extends State<CartScreen> {
           }
 
           for (final item in cart.products) {
+            // We use a local quantity map so the user can adjust counts in the UI
+            // without mutating the fetched cart object from the API.
             _quantities.putIfAbsent(item.id, () => item.quantity);
           }
 

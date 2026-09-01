@@ -42,6 +42,8 @@ class UserService {
   // Why this exists: To persist user session across app restarts
   Future<void> saveUserData(Map<String, dynamic> userData) async {
     final prefs = await SharedPreferences.getInstance();
+    // The API returns a JSON map. We convert it into a User model so the
+    // app can store the most important session fields in a consistent way.
     final user = User.fromJson(userData);
 
     await prefs.setInt('id', user.id);
@@ -68,6 +70,8 @@ class UserService {
   Future<Map<String, dynamic>> getUserData() async {
     final prefs = await SharedPreferences.getInstance();
 
+    // This reads the saved token and profile data back from local storage so the
+    // app can recreate the logged-in user state after a restart.
     return {
       'id': prefs.getInt('id') ?? 0,
       'username': prefs.getString('username') ?? '',
@@ -95,6 +99,8 @@ class UserService {
   // Why this exists: To determine if user needs to login
   Future<bool> isLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
+    // The splash screen checks this before deciding whether to show the home flow
+    // or send the user back to sign in.
     final token = prefs.getString('accessToken') ?? prefs.getString('token');
     return token != null && token.isNotEmpty;
   }
