@@ -28,9 +28,9 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   double _lineTotal(CartProduct item) {
-    // This calculates the current item total using the local quantity map.
-    // The discount is applied to the line total so the UI reflects the real price
-    // the customer would pay for that item.
+    // The API gives me the base item price and discount, but the UI also has its
+    // own local quantity state. This method combines both so the displayed total
+    // matches what the user is currently seeing in the screen.
     final qty = _quantities[item.id] ?? item.quantity;
     final rawTotal = item.price * qty;
     return rawTotal - (rawTotal * item.discountPercentage / 100);
@@ -62,11 +62,13 @@ class _CartScreenState extends State<CartScreen> {
           }
 
           for (final item in cart.products) {
-            // We use a local quantity map so the user can adjust counts in the UI
-            // without mutating the fetched cart object from the API.
+            // I keep the quantity in a local map because the UI can be adjusted
+            // without immediately changing the server-side cart data.
             _quantities.putIfAbsent(item.id, () => item.quantity);
           }
 
+          // This subtotal is calculated from the screen's current local quantity map,
+          // so it reflects the user-visible cart state instead of only the API data.
           final subtotal = cart.products.fold<double>(
             0,
             (sum, item) => sum + _lineTotal(item),
@@ -83,6 +85,8 @@ class _CartScreenState extends State<CartScreen> {
                     final qty = _quantities[item.id] ?? item.quantity;
 
                     return GestureDetector(
+                      // Tapping a cart item reloads the product details so the user can
+                      // revisit the item they just added without leaving the cart flow.
                       onTap: () {
                         Navigator.push(
                           context,

@@ -112,6 +112,8 @@ class _MainNavigationState extends State<MainNavigation> {
   // Why this exists: To easily map tab index to screen
   final List<Widget> _screens = [
     const HomeScreen(),
+    // Lab 3 adds the cart tab to the main app shell so users can move between
+    // the product list and the shopping cart without leaving the navigation flow.
     const CartScreen(),
     const ProfileScreen(),
     const DualCounterScreen(),

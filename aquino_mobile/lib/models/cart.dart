@@ -1,7 +1,7 @@
-// Purpose: Represents a Cart entity from the DummyJSON API
-// Responsibilities: Store cart data and provide JSON serialization
-// Why this class exists: To type-safe represent cart data instead of using dynamic
-
+// Lab 3 keeps the same Model → Service → Screen pattern from Lab 2,
+// but adds Cart as the new domain model for the shopping flow.
+// I use this class so the API response can be treated as a typed object instead
+// of a loose map of dynamic values.
 class Cart {
   final int id;
   final List<CartProduct> products;
@@ -49,6 +49,8 @@ class Cart {
   }
 }
 
+// Each cart entry is modeled separately so the UI can display item-level
+// details like price, quantity, and discount without losing the response shape.
 class CartProduct {
   final int id;
   final String title;

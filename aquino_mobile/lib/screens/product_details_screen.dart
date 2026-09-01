@@ -114,8 +114,9 @@ class ProductDetailsScreen extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () async {
                         try {
-                          // The app reads the stored user id before adding the product to
-                          // the cart so the cart is scoped to the logged-in user.
+                          // Lab 3 keeps the same model/service/screen pattern from Lab 2,
+                          // but this action goes through CartService instead of doing the
+                          // HTTP call directly in the screen.
                           final userService = UserService();
                           final userData = await userService.getUserData();
                           final userId = userData['id'] as int? ?? currentUserId;

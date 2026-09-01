@@ -26,16 +26,16 @@ This is the base product app. It adds the model/service/screen pattern and intro
 
 ## Where is it?
 
-| Concept | File | Class/Function | What it does |
-|---|---|---|---|
-| API config | `lib/constants.dart` | `baseUrl`, `productsUrl`, `searchUrl` | Centralizes the DummyJSON endpoints |
-| Product model | `lib/models/product.dart` | `Product`, `Product.fromJson()` | Converts API JSON into a Dart object |
-| Product service | `lib/services/product_service.dart` | `fetchProducts()`, `searchProducts()`, `fetchProductById()` | Calls the API and returns `Product` objects |
-| Product list | `lib/screens/home_screen.dart` | `HomeScreen`, `_loadProducts()` | Loads products and handles search |
-| Details screen | `lib/screens/product_details_screen.dart` | `ProductDetailsScreen` | Shows one selected product |
-| Reusable item | `lib/widgets/product_card.dart` | `ProductCard` | Displays a product card in the list |
-| Theme provider | `lib/providers/theme_provider.dart` | `ThemeProvider` | Stores dark/light state |
-| Settings screen | `lib/screens/settings_screen.dart` | `SettingsScreen` | Lets the user toggle the theme |
+| Concept         | File                                      | Class/Function                                              | What it does                                |
+| --------------- | ----------------------------------------- | ----------------------------------------------------------- | ------------------------------------------- |
+| API config      | `lib/constants.dart`                      | `baseUrl`, `productsUrl`, `searchUrl`                       | Centralizes the DummyJSON endpoints         |
+| Product model   | `lib/models/product.dart`                 | `Product`, `Product.fromJson()`                             | Converts API JSON into a Dart object        |
+| Product service | `lib/services/product_service.dart`       | `fetchProducts()`, `searchProducts()`, `fetchProductById()` | Calls the API and returns `Product` objects |
+| Product list    | `lib/screens/home_screen.dart`            | `HomeScreen`, `_loadProducts()`                             | Loads products and handles search           |
+| Details screen  | `lib/screens/product_details_screen.dart` | `ProductDetailsScreen`                                      | Shows one selected product                  |
+| Reusable item   | `lib/widgets/product_card.dart`           | `ProductCard`                                               | Displays a product card in the list         |
+| Theme provider  | `lib/providers/theme_provider.dart`       | `ThemeProvider`                                             | Stores dark/light state                     |
+| Settings screen | `lib/screens/settings_screen.dart`        | `SettingsScreen`                                            | Lets the user toggle the theme              |
 
 ## How the data flows
 
@@ -90,69 +90,81 @@ The project does not have a separate `ProductScreen` file. The list is implement
 
 # Lab Activity 3
 
-## What changed?
+## What changed from Lab 2?
 
-This is the cart layer. It adds a cart model, cart service, and a cart screen that uses the currently selected user context.
+Lab 2 taught the product model/service/screen flow. Lab 3 extends that same structure by adding a cart model, a cart service, and a dedicated cart screen. The app keeps the same architecture, but the new feature adds a second domain object: cart data.
 
-## Where is it?
+## Lab 3 files
 
-| Concept | File | Class/Function | What it does |
-|---|---|---|---|
-| Cart model | `lib/models/cart.dart` | `Cart`, `CartProduct`, `Cart.fromJson()` | Represents the cart response and each cart item |
-| Cart service | `lib/services/cart_service.dart` | `getAllCarts()`, `getCartByUserId()`, `addToCart()` | Calls the cart API |
-| Cart screen | `lib/screens/cart_screen.dart` | `CartScreen`, `_lineTotal()`, `build()` | Displays cart items, quantity, and subtotal |
-| Add-to-cart trigger | `lib/screens/product_details_screen.dart` | button `onPressed` | Sends product ID and quantity to the cart API |
-| Screen navigation | `lib/main.dart` | `MainNavigation` | Shows the cart tab in the app shell |
+| Concept               | File                                      | Class/Function                                      | Purpose                                              |
+| --------------------- | ----------------------------------------- | --------------------------------------------------- | ---------------------------------------------------- |
+| Cart model            | `lib/models/cart.dart`                    | `Cart`, `CartProduct`, `Cart.fromJson()`            | Represents the cart response and each item inside it |
+| Cart service          | `lib/services/cart_service.dart`          | `getAllCarts()`, `getCartByUserId()`, `addToCart()` | Handles HTTP calls for cart data                     |
+| Cart screen           | `lib/screens/cart_screen.dart`            | `CartScreen`, `_CartScreenState`, `_lineTotal()`    | Displays the cart, quantity controls, and subtotal   |
+| Product detail action | `lib/screens/product_details_screen.dart` | `ProductDetailsScreen`                              | Adds the selected product to the user's cart         |
+| Main navigation       | `lib/main.dart`                           | `MainNavigation`                                    | Adds the cart tab to the app shell                   |
+| User scoping          | `lib/constants.dart`                      | `currentUserId`                                     | Provides the demo user ID used to scope the cart     |
+| Product model         | `lib/models/product.dart`                 | `Product`                                           | Supplies the product object used by the cart flow    |
 
-## How the data flows
+## Cart data flow
 
-User
+`CartScreen`
 ↓
-`ProductDetailsScreen`
-↓
-`CartService.addToCart()`
+`CartService.getCartByUserId()`
 ↓
 DummyJSON cart endpoint
 ↓
 `Cart.fromJson()`
 ↓
-`CartScreen`
+`CartProduct`
 ↓
-UI totals / quantity controls
+UI list + subtotal + quantity controls
 
-The actual flow is:
+This is the actual flow in the repo: the screen requests cart data, the service calls the API, and the response is converted into typed objects before the UI uses it.
 
-1. `ProductDetailsScreen` reads the saved user data from `UserService.getUserData()`.
-2. It gets a user ID, then calls `CartService().addToCart(userId, [{'id': product.id, 'quantity': 1}])`.
-3. The cart API returns cart data.
-4. `CartScreen` loads the cart with `CartService().getCartByUserId(widget.userId)`.
-5. The screen keeps a local quantity map for the user to change item counts in the UI.
-6. `_lineTotal()` calculates the discounted total for each item.
-7. `subtotal` is calculated by folding the cart list.
+## Add to cart flow
 
-## Important code to study
+`ProductDetailsScreen`
+↓
+saved user ID / `currentUserId`
+↓
+`CartService.addToCart()`
+↓
+DummyJSON `/carts/add`
+↓
+`Cart.fromJson()` response
+↓
+user sees the cart update or a snackbar message
 
-- `Cart.fromJson()` in `lib/models/cart.dart`
-- `CartProduct.fromJson()` in `lib/models/cart.dart`
-- `CartService.getCartByUserId()` in `lib/services/cart_service.dart`
-- `CartService.addToCart()` in `lib/services/cart_service.dart`
-- `CartScreen` in `lib/screens/cart_screen.dart`
-- `_lineTotal()` in `lib/screens/cart_screen.dart`
-- Add-to-cart button logic in `lib/screens/product_details_screen.dart`
+The key detail is that the add-to-cart action is still a network-backed demo, not a local-only in-memory cart.
 
-## Explain it simply
+## Cart → product details flow
 
-The cart is tied to a user ID. The app does not keep one global cart for all users. It asks the API for a specific cart using the current user. The cart screen also calculates totals in the UI so the user can see the item value before confirming an order.
+Inside `CartScreen`, tapping an item starts a product fetch with `ProductService.fetchProductById(item.id)`, then opens `ProductDetailsScreen(product: snapshot.data!)`. This is a useful pattern because it reuses the same detail screen for both the product list and the cart list.
 
-Important honesty note: this is a network-backed cart call using DummyJSON, not a purely local or permanently saved cart state.
+## Important functions to study
+
+- `Cart.fromJson()` in `lib/models/cart.dart` — converts the API JSON into a reusable cart object.
+- `CartProduct.fromJson()` in `lib/models/cart.dart` — converts each cart item into a typed model.
+- `CartService.getCartByUserId()` in `lib/services/cart_service.dart` — requests the current user's cart.
+- `CartService.addToCart()` in `lib/services/cart_service.dart` — sends a product payload to the cart endpoint.
+- `_lineTotal()` in `lib/screens/cart_screen.dart` — calculates the displayed total using the local quantity map and the item discount.
+- `_quantities` in `lib/screens/cart_screen.dart` — stores the UI quantity state for each product item.
+- The Add to Cart button in `lib/screens/product_details_screen.dart` — this is the Lab 3 feature trigger.
+
+## What Lab 3 teaches
+
+The important architectural idea is that Lab 3 keeps the same Model → Service → Screen pattern from Lab 2, but adds a second domain model for cart data. The cart screen is not doing raw HTTP work directly. It asks `CartService` for the data, then it renders the response and handles some local UI changes like quantity controls.
+
+This is a good example of a service layer separating API responsibility from UI logic.
 
 ## What I should be able to explain
 
-- How does the cart know which user it belongs to?
-- Why does `CartScreen` use a local quantity map?
-- Where is the subtotal calculated?
-- Is the cart state permanent? What is the actual behavior in this repository?
-- What triggers the cart API call from the product details screen?
+- Why is the cart logic in a service instead of inside the screen?
+- How does the app know which user cart to request?
+- Why does the cart screen keep a local quantity map?
+- How does the product details screen call the cart API?
+- What is the difference between API cart data and local UI state?
 
 ---
 
@@ -164,14 +176,14 @@ This adds login, session persistence, splash-screen auth checks, and profile/log
 
 ## Where is it?
 
-| Concept | File | Class/Function | What it does |
-|---|---|---|---|
-| User model | `lib/models/user.dart` | `User`, `User.fromJson()` | Represents the authenticated user |
-| User service | `lib/services/user_service.dart` | `loginUser()`, `saveUserData()`, `getUserData()`, `isLoggedIn()`, `logout()` | Handles auth and local persistence |
-| Splash check | `lib/screens/splash_screen.dart` | `SplashScreen`, `_checkAuthentication()` | Decides whether to continue or redirect |
-| Sign in screen | `lib/screens/signin_screen.dart` | `SigninScreen`, `_login()` | Sends credentials and logs the user in |
-| Profile screen | `lib/screens/profile_screen.dart` | `ProfileScreen`, `_logout()` | Reads saved user data and logs out |
-| Navigation | `lib/main.dart` | `MyApp`, `MainNavigation` | Sets `'/splash'`, `'/signin'`, and `'/home'` routes |
+| Concept        | File                              | Class/Function                                                               | What it does                                        |
+| -------------- | --------------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------- |
+| User model     | `lib/models/user.dart`            | `User`, `User.fromJson()`                                                    | Represents the authenticated user                   |
+| User service   | `lib/services/user_service.dart`  | `loginUser()`, `saveUserData()`, `getUserData()`, `isLoggedIn()`, `logout()` | Handles auth and local persistence                  |
+| Splash check   | `lib/screens/splash_screen.dart`  | `SplashScreen`, `_checkAuthentication()`                                     | Decides whether to continue or redirect             |
+| Sign in screen | `lib/screens/signin_screen.dart`  | `SigninScreen`, `_login()`                                                   | Sends credentials and logs the user in              |
+| Profile screen | `lib/screens/profile_screen.dart` | `ProfileScreen`, `_logout()`                                                 | Reads saved user data and logs out                  |
+| Navigation     | `lib/main.dart`                   | `MyApp`, `MainNavigation`                                                    | Sets `'/splash'`, `'/signin'`, and `'/home'` routes |
 
 ## How the data flows
 
@@ -248,14 +260,14 @@ The login is handled by `UserService`. The service sends the credentials to the 
 
 # API map
 
-| Feature | Service | Endpoint | Method | Model | Screen |
-|---|---|---|---|---|---|
-| Fetch products | `ProductService.fetchProducts()` | `baseUrl + /products` | GET | `Product` | `HomeScreen` |
-| Search products | `ProductService.searchProducts()` | `baseUrl + /products/search?q=` | GET | `Product` | `HomeScreen` |
-| Fetch product by ID | `ProductService.fetchProductById()` | `baseUrl + /products/{id}` | GET | `Product` | `ProductDetailsScreen` |
-| Login | `UserService.loginUser()` | `baseUrl + /auth/login` | POST | `User` | `SigninScreen` |
-| Get cart by user | `CartService.getCartByUserId()` | `baseUrl + /carts/user/{userId}` | GET | `Cart` | `CartScreen` |
-| Add to cart | `CartService.addToCart()` | `baseUrl + /carts/add` | POST | `Cart` | `ProductDetailsScreen` |
+| Feature             | Service                             | Endpoint                         | Method | Model     | Screen                 |
+| ------------------- | ----------------------------------- | -------------------------------- | ------ | --------- | ---------------------- |
+| Fetch products      | `ProductService.fetchProducts()`    | `baseUrl + /products`            | GET    | `Product` | `HomeScreen`           |
+| Search products     | `ProductService.searchProducts()`   | `baseUrl + /products/search?q=`  | GET    | `Product` | `HomeScreen`           |
+| Fetch product by ID | `ProductService.fetchProductById()` | `baseUrl + /products/{id}`       | GET    | `Product` | `ProductDetailsScreen` |
+| Login               | `UserService.loginUser()`           | `baseUrl + /auth/login`          | POST   | `User`    | `SigninScreen`         |
+| Get cart by user    | `CartService.getCartByUserId()`     | `baseUrl + /carts/user/{userId}` | GET    | `Cart`    | `CartScreen`           |
+| Add to cart         | `CartService.addToCart()`           | `baseUrl + /carts/add`           | POST   | `Cart`    | `ProductDetailsScreen` |
 
 ---
 

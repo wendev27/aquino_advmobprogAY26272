@@ -19,5 +19,6 @@ String get productsUrl => '$baseUrl$productsEndpoint';
 /// Full URL for search API
 String get searchUrl => '$baseUrl$searchEndpoint';
 
-/// DummyJSON has no real auth, so we hardcode a demo user id to scope the cart to "one user"
+/// DummyJSON does not provide a real authenticated session, so this is a demo
+/// fallback user ID used only to scope the cart to one example account.
 const int currentUserId = 1;

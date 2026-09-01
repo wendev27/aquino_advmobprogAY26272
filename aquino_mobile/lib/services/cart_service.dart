@@ -3,14 +3,11 @@ import 'package:http/http.dart' as http;
 import '../constants.dart';
 import '../models/cart.dart';
 
-// Purpose: Handle all API calls related to carts using DummyJSON
-// Responsibilities: Fetch carts, get cart by user, add to cart
-// Why this class exists: To separate cart API logic from UI code
-
+// I keep the cart HTTP calls in this service so the screen code stays focused on
+// UI behavior instead of raw API details.
 class CartService {
-  // Fetch all carts from the API
-  // Outputs: List of Cart objects
-  // Throws: Exception if API call fails
+  // This method fetches the full cart list from the DummyJSON API. I do not use
+  // it in the screen here, but it is part of the same cart responsibility layer.
   Future<List<Cart>> getAllCarts() async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/carts'));
@@ -48,10 +45,8 @@ class CartService {
     }
   }
 
-  // Add products to cart for a specific user
-  // Inputs: User ID and list of products (each with id and quantity)
-  // Outputs: Updated Cart object
-  // Throws: Exception if API call fails
+  // This method is the Lab 3 add-to-cart action. It sends the current user and
+  // product payload to the API, then converts the response into a Cart model.
   Future<Cart> addToCart(
     int userId,
     List<Map<String, dynamic>> products,
