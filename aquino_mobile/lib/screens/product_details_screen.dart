@@ -116,10 +116,15 @@ class ProductDetailsScreen extends StatelessWidget {
                         final cartProvider = Provider.of<CartProvider>(context, listen: false);
                         cartProvider.addToCart(product);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
+                          SnackBar(
                             content: Text('Added to cart'),
                             behavior: SnackBarBehavior.floating,
-                            margin: EdgeInsets.fromLTRB(24, 0, 24, 16),
+                            margin: EdgeInsets.fromLTRB(
+                              24,
+                              0,
+                              24,
+                              MediaQuery.sizeOf(context).height * 0.42,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.all(Radius.circular(16)),
                             ),
