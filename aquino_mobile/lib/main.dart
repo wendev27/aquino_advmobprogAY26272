@@ -4,9 +4,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'constants.dart';
 import 'providers/theme_provider.dart';
 import 'providers/counter_provider.dart';
+import 'providers/cart_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/dual_counter_screen.dart';
+import 'screens/cart_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/signin_screen.dart';
@@ -43,6 +45,10 @@ class MyApp extends StatelessWidget {
         // the value survives across navigation, unlike local setState() data.
         ChangeNotifierProvider(
           create: (_) => CounterProvider(),
+        ),
+        // CartProvider manages the shopping cart state across the app.
+        ChangeNotifierProvider(
+          create: (_) => CartProvider(),
         ),
       ],
       child: Consumer<ThemeProvider>(
