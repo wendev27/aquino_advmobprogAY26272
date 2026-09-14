@@ -124,7 +124,7 @@ class _CartScreenState extends State<CartScreen> {
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.1),
-                blurPixelRadius: 4,
+                blurRadius: 4,
                 offset: const Offset(0, -2),
               ),
             ],
