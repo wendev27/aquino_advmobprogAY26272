@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../constants.dart';
 import '../models/product.dart';
+import '../services/cart_service.dart';
+import '../services/user_service.dart';
 
 // Purpose: Display detailed information about a single product
 // Responsibilities: Show product image, description, price, rating, and category
@@ -104,6 +106,43 @@ class ProductDetailsScreen extends StatelessWidget {
                   Text(
                     product.description,
                     style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 24),
+                  // Add to cart button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        try {
+                          final userService = UserService();
+                          final userData = await userService.getUserData();
+                          final userId = userData['id'] as int? ?? 1;
+
+                          await CartService().addToCart(
+                            userId,
+                            [
+                              {'id': product.id, 'quantity': 1},
+                            ],
+                          );
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Added to cart')),
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Failed to add: $e')),
+                            );
+                          }
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: Colors.amber,
+                      ),
+                      child: const Text('Add to Cart'),
+                    ),
                   ),
                 ],
               ),

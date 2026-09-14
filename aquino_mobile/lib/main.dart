@@ -106,7 +106,7 @@ class MainNavigation extends StatefulWidget {
   final int userId;
 
   // Constructor for MainNavigation
-  const MainNavigation({super.key, this.userId = 1});
+  const MainNavigation({super.key, this.userId = currentUserId});
 
   @override
   State<MainNavigation> createState() => _MainNavigationState();
@@ -120,6 +120,7 @@ class _MainNavigationState extends State<MainNavigation> {
   // Why this exists: To easily map tab index to screen
   late final List<Widget> _screens = [
     const HomeScreen(),
+    CartScreen(userId: widget.userId),
     const ProfileScreen(),
     const DualCounterScreen(),
     const SettingsScreen(),
@@ -151,6 +152,11 @@ class _MainNavigationState extends State<MainNavigation> {
             icon: Icon(Icons.home),
             label: 'Home',
           ),
+          // Cart tab
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_cart),
+            label: 'Cart',
+          ),
           // Profile tab
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
@@ -170,4 +176,5 @@ class _MainNavigationState extends State<MainNavigation> {
       ),
     );
   }
+}
 }
