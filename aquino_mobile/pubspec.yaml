@@ -1,5 +1,5 @@
 name: lab_activity
-description: Flutter Lab Activities 1 and 2
+description: 'A new Flutter project.'
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -9,10 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  provider: ^6.1.1
-  http: ^1.1.0
-  flutter_dotenv: ^5.1.0
-  shared_preferences: ^2.2.2
+  cupertino_icons: ^1.0.8
 
 dev_dependencies:
   flutter_test:
@@ -21,5 +18,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  assets:
-    - .env
