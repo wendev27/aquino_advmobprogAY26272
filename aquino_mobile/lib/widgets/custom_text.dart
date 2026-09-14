@@ -1,57 +1,42 @@
 import 'package:flutter/material.dart';
 
-// Purpose: Provide a reusable text widget with consistent styling
-// Responsibilities: Display text with customizable style properties
-// Why this class exists: To create a reusable text component for consistent UI
-
 class CustomText extends StatelessWidget {
-  // The text to display
-  final String text;
-  
-  // Font size of the text
-  final double? fontSize;
-  
-  // Font weight of the text
-  final FontWeight? fontWeight;
-  
-  // Color of the text
-  final Color? color;
-  
-  // Text alignment
-  final TextAlign? textAlign;
-  
-  // Maximum number of lines
-  final int? maxLines;
-  
-  // How to handle overflow
-  final TextOverflow? overflow;
-
-  // Constructor for CustomText
-  // Inputs: Text string and optional styling parameters
-  // Why this exists: To create a text widget with flexible styling options
   const CustomText({
     super.key,
     required this.text,
-    this.fontSize,
-    this.fontWeight,
-    this.color,
-    this.textAlign,
+    this.fontSize = 12,
+    this.fontFamily = 'Poppins',
+    this.fontWeight = FontWeight.normal,
+    this.textAlign = TextAlign.left,
+    this.letterSpacing = 0,
+    this.fontStyle = FontStyle.normal,
     this.maxLines,
     this.overflow,
   });
+
+  final String text;
+  final double fontSize, letterSpacing;
+  final int? maxLines;
+  final TextOverflow? overflow;
+  final FontWeight fontWeight;
+  final TextAlign textAlign;
+  final String fontFamily;
+  final FontStyle fontStyle;
 
   @override
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: TextStyle(
-        fontSize: fontSize,
-        fontWeight: fontWeight,
-        color: color,
-      ),
-      textAlign: textAlign,
       maxLines: maxLines,
       overflow: overflow,
+      textAlign: textAlign,
+      style: TextStyle(
+        fontFamily: fontFamily,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        fontStyle: fontStyle,
+        letterSpacing: letterSpacing,
+      ),
     );
   }
 }

@@ -1,128 +1,101 @@
 import 'package:flutter/material.dart';
-import '../models/product.dart';
 
-// Purpose: Display detailed information about a single product
-// Responsibilities: Show product image, description, price, rating, and category
-// Why this class exists: To provide a dedicated screen for viewing product details
+import '../models/product.dart';
+import '../widgets/custom_text.dart';
 
 class ProductDetailsScreen extends StatelessWidget {
-  // The product to display
   final Product product;
 
-  // Constructor for ProductDetailsScreen
-  // Inputs: Product object to display
-  // Why this exists: To create a details screen with product data
-  const ProductDetailsScreen({
-    super.key,
-    required this.product,
-  });
+  const ProductDetailsScreen({super.key, required this.product});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Product Details'),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Product image
-            SizedBox(
-              width: double.infinity,
-              height: 300,
-              child: Image.network(
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 300,
+            pinned: true,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Image.network(
                 product.thumbnail,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) {
-                  // Show placeholder if image fails to load
-                  return const Center(
-                    child: Icon(Icons.image_not_supported, size: 100),
-                  );
-                },
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  color: Colors.grey.shade300,
+                  child: const Icon(Icons.image, size: 48),
+                ),
               ),
             ),
-            // Product information
-            Padding(
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Product category
-                  Text(
-                    product.category.toUpperCase(),
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  CustomText(
+                    text: product.title,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
                   ),
                   const SizedBox(height: 8),
-                  // Product title
-                  Text(
-                    product.title,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 16),
-                  // Product price
-                  Text(
-                    '\$${product.price.toStringAsFixed(2)}',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Product rating
                   Row(
                     children: [
-                      const Icon(Icons.star, color: Colors.amber),
-                      const SizedBox(width: 8),
-                      Text(
-                        product.rating.toStringAsFixed(1),
-                        style: Theme.of(context).textTheme.titleLarge,
+                      CustomText(
+                        text: '\$${product.price.toStringAsFixed(2)}',
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      const SizedBox(width: 12),
+                      const Icon(Icons.star, size: 16, color: Colors.amber),
+                      const SizedBox(width: 4),
+                      CustomText(
+                        text: product.rating.toStringAsFixed(1),
+                        fontSize: 13,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
-                  // Divider
-                  const Divider(),
+                  const SizedBox(height: 4),
+                  CustomText(
+                    text: '${product.brand} · ${product.category}',
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                  ),
                   const SizedBox(height: 16),
-                  // Description label
-                  Text(
-                    'Description',
-                    style: Theme.of(context).textTheme.titleLarge,
+                  const CustomText(
+                    text: 'Description',
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(height: 8),
-                  // Product description
-                  Text(
-                    product.description,
-                    style: Theme.of(context).textTheme.bodyMedium,
+                  const SizedBox(height: 6),
+                  CustomText(
+                    text: product.description,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  const SizedBox(height: 16),
+                  CustomText(
+                    text: 'Stock: ${product.stock} available',
+                    fontSize: 12,
                   ),
                   const SizedBox(height: 24),
-                  // Add to cart button (placeholder)
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        // Show snackbar as feedback
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Added ${product.title} to cart'),
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      onPressed: () {},
+                      child: const CustomText(
+                        text: 'Read All',
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
                       ),
-                      child: const Text('Add to Cart'),
                     ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

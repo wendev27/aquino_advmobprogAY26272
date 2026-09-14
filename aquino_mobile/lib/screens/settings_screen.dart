@@ -1,68 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/theme_provider.dart';
 
-// Purpose: Display app settings and preferences
-// Responsibilities: Show dark mode toggle and other app settings
-// Why this class exists: To provide a dedicated screen for user preferences
+import '../providers/theme_provider.dart';
+import '../widgets/custom_text.dart';
 
 class SettingsScreen extends StatelessWidget {
-  // Constructor for SettingsScreen
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: const CustomText(
+          text: 'Settings',
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
       ),
-      body: Consumer<ThemeProvider>(
-        // Rebuild when theme provider changes
-        builder: (context, themeProvider, child) {
-          return ListView(
-            children: [
-              // Dark mode setting
-              SwitchListTile(
-                title: const Text('Dark Mode'),
-                subtitle: const Text('Enable dark theme for the app'),
-                secondary: Icon(
-                  themeProvider.isDarkMode ? Icons.dark_mode : Icons.light_mode,
-                ),
-                value: themeProvider.isDarkMode,
-                onChanged: (value) {
-                  // Toggle theme when switch is changed
-                  themeProvider.toggleTheme();
-                },
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade400),
+            ),
+            child: SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const CustomText(
+                text: 'Dark Mode',
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
               ),
-              const Divider(),
-              // App info section
-              const Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'About',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      'Lab Activity 1 & 2',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    Text(
-                      'Flutter State Management',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ],
-                ),
+              subtitle: CustomText(
+                text: themeProvider.isDark ? 'Enabled' : 'Disabled',
+                fontSize: 12,
               ),
-            ],
-          );
-        },
+              value: themeProvider.isDark,
+              onChanged: (value) {
+                context.read<ThemeProvider>().setDarkMode(value);
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

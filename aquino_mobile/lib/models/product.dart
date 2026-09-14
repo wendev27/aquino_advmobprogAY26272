@@ -1,70 +1,147 @@
-// Purpose: Represents a Product entity from the DummyJSON API
-// Responsibilities: Store product data and provide JSON serialization
-// Why this class exists: To type-safe represent product data instead of using dynamic
-
 class Product {
-  // Unique identifier for the product
   final int id;
-  
-  // Title/name of the product
   final String title;
-  
-  // Description of the product
   final String description;
-  
-  // Price of the product
-  final double price;
-  
-  // Thumbnail image URL
-  final String thumbnail;
-  
-  // Category of the product
   final String category;
-  
-  // Rating of the product
+  final double price;
+  final double discountPercentage;
   final double rating;
+  final int stock;
+  final List<String> tags;
+  final String brand;
+  final String sku;
+  final double weight;
+  final ProductDimensions dimensions;
+  final String warrantyInformation;
+  final String shippingInformation;
+  final String availabilityStatus;
+  final List<ProductReview> reviews;
+  final String returnPolicy;
+  final int minimumOrderQuantity;
+  final ProductMeta meta;
+  final List<String> images;
+  final String thumbnail;
 
-  // Constructor for Product
-  // Inputs: All required product fields
-  // Why this exists: To create a Product instance with all necessary data
   Product({
     required this.id,
     required this.title,
     required this.description,
-    required this.price,
-    required this.thumbnail,
     required this.category,
+    required this.price,
+    required this.discountPercentage,
     required this.rating,
+    required this.stock,
+    required this.tags,
+    required this.brand,
+    required this.sku,
+    required this.weight,
+    required this.dimensions,
+    required this.warrantyInformation,
+    required this.shippingInformation,
+    required this.availabilityStatus,
+    required this.reviews,
+    required this.returnPolicy,
+    required this.minimumOrderQuantity,
+    required this.meta,
+    required this.images,
+    required this.thumbnail,
   });
 
-  // Factory constructor to create Product from JSON
-  // Inputs: Map<String, dynamic> containing product data from API
-  // Outputs: Product instance
-  // Why this exists: To parse API response into type-safe Product objects
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      id: json['id'] as int,
-      title: json['title'] as String,
-      description: json['description'] as String,
+      id: json['id'],
+      title: json['title'],
+      description: json['description'],
+      category: json['category'],
       price: (json['price'] as num).toDouble(),
-      thumbnail: json['thumbnail'] as String,
-      category: json['category'] as String,
+      discountPercentage: (json['discountPercentage'] as num).toDouble(),
       rating: (json['rating'] as num).toDouble(),
+      stock: json['stock'],
+      tags: List<String>.from(json['tags'] ?? []),
+      brand: json['brand'] ?? '',
+      sku: json['sku'],
+      weight: (json['weight'] as num).toDouble(),
+      dimensions: ProductDimensions.fromJson(json['dimensions']),
+      warrantyInformation: json['warrantyInformation'],
+      shippingInformation: json['shippingInformation'],
+      availabilityStatus: json['availabilityStatus'],
+      reviews: (json['reviews'] as List)
+          .map((i) => ProductReview.fromJson(i))
+          .toList(),
+      returnPolicy: json['returnPolicy'],
+      minimumOrderQuantity: json['minimumOrderQuantity'],
+      meta: ProductMeta.fromJson(json['meta']),
+      images: List<String>.from(json['images'] ?? []),
+      thumbnail: json['thumbnail'],
     );
   }
+}
 
-  // Convert Product to JSON
-  // Outputs: Map<String, dynamic> representation of Product
-  // Why this exists: To serialize Product for API requests or storage
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'description': description,
-      'price': price,
-      'thumbnail': thumbnail,
-      'category': category,
-      'rating': rating,
-    };
+class ProductDimensions {
+  final double width;
+  final double height;
+  final double depth;
+
+  ProductDimensions({
+    required this.width,
+    required this.height,
+    required this.depth,
+  });
+
+  factory ProductDimensions.fromJson(Map<String, dynamic> json) {
+    return ProductDimensions(
+      width: (json['width'] as num).toDouble(),
+      height: (json['height'] as num).toDouble(),
+      depth: (json['depth'] as num).toDouble(),
+    );
+  }
+}
+
+class ProductReview {
+  final int rating;
+  final String comment;
+  final String date;
+  final String reviewerName;
+  final String reviewerEmail;
+
+  ProductReview({
+    required this.rating,
+    required this.comment,
+    required this.date,
+    required this.reviewerName,
+    required this.reviewerEmail,
+  });
+
+  factory ProductReview.fromJson(Map<String, dynamic> json) {
+    return ProductReview(
+      rating: json['rating'],
+      comment: json['comment'],
+      date: json['date'],
+      reviewerName: json['reviewerName'],
+      reviewerEmail: json['reviewerEmail'],
+    );
+  }
+}
+
+class ProductMeta {
+  final String createdAt;
+  final String updatedAt;
+  final String barcode;
+  final String qrCode;
+
+  ProductMeta({
+    required this.createdAt,
+    required this.updatedAt,
+    required this.barcode,
+    required this.qrCode,
+  });
+
+  factory ProductMeta.fromJson(Map<String, dynamic> json) {
+    return ProductMeta(
+      createdAt: json['createdAt'],
+      updatedAt: json['updatedAt'],
+      barcode: json['barcode'],
+      qrCode: json['qrCode'],
+    );
   }
 }
