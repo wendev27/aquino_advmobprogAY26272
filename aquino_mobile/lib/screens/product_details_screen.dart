@@ -112,6 +112,8 @@ class ProductDetailsScreen extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () async {
+                        // Sends the selected product to the cart endpoint and
+                        // confirms the result without leaving this screen.
                         try {
                           await CartService().addToCart(
                             currentUserId,

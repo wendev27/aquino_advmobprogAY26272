@@ -18,6 +18,7 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
+  // Keeps quantity changes local to the cart screen while the API cart is open.
   late Future<Cart?> _cartFuture;
   final Map<int, int> _quantities = {};
 
@@ -63,6 +64,7 @@ class _CartScreenState extends State<CartScreen> {
           }
 
           final subtotal = cart.products.fold<double>(
+            // Adds each discounted line total to get the amount shown below.
             0,
             (sum, item) => sum + _lineTotal(item),
           );
