@@ -27,7 +27,7 @@ class _SigninScreenState extends State<SigninScreen> {
     super.dispose();
   }
 
-  // Handle login process
+  // Validates the form before sending the credentials to UserService.
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);

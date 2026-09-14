@@ -90,6 +90,8 @@ class MyApp extends StatelessWidget {
               '/signin': (context) => const SigninScreen(),
               '/home': (context) {
                 final args = ModalRoute.of(context)?.settings.arguments;
+                // Passes the signed-in user ID through navigation so the
+                // home and cart screens use the current user's data.
                 final userId = args is Map<String, dynamic>
                     ? (args['id'] as int? ?? currentUserId)
                     : currentUserId;

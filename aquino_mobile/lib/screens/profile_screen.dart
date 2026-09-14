@@ -39,6 +39,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: const Text('Profile'),
       ),
       body: FutureBuilder<User>(
+        // Loads the saved session user before displaying profile details.
         future: _userFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
