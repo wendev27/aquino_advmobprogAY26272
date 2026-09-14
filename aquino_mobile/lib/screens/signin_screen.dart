@@ -45,8 +45,13 @@ class _SigninScreenState extends State<SigninScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
+      final errorText = e.toString().toLowerCase();
+      final message = errorText.contains('invalid credentials') ||
+              errorText.contains('401')
+          ? 'Invalid username or password'
+          : 'Login failed. Please try again.';
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: ${e.toString()}')),
+        SnackBar(content: Text(message)),
       );
     }
   }
