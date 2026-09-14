@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
 import '../services/user_service.dart';
+import 'cart_screen.dart';
 
 // Purpose: Display user profile information
 // Responsibilities: Show user details, provide logout functionality

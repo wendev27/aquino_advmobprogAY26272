@@ -119,7 +119,8 @@ class _CartScreenState extends State<CartScreen> {
       bottomNavigationBar: Consumer<CartProvider>(
         builder: (context, cartProvider, child) {
           if (cartProvider.cartProducts.isEmpty) {
-            return null;
+            // A widget is required here even when there is no cart summary.
+            return const SizedBox.shrink();
           }
           return Container(
             padding: const EdgeInsets.all(16),
