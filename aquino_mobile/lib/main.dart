@@ -7,7 +7,6 @@ import 'providers/counter_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/dual_counter_screen.dart';
-import 'screens/cart_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/signin_screen.dart';
@@ -121,9 +120,6 @@ class _MainNavigationState extends State<MainNavigation> {
   // Why this exists: To easily map tab index to screen
   late final List<Widget> _screens = [
     const HomeScreen(),
-    // Lab 3 adds the cart tab to the main app shell so users can move between
-    // the product list and the shopping cart without leaving the navigation flow.
-    CartScreen(userId: widget.userId),
     const ProfileScreen(),
     const DualCounterScreen(),
     const SettingsScreen(),
@@ -154,11 +150,6 @@ class _MainNavigationState extends State<MainNavigation> {
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
-          ),
-          // Cart tab
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: 'Cart',
           ),
           // Profile tab
           BottomNavigationBarItem(

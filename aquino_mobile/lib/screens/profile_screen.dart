@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
 import '../services/user_service.dart';
-import 'cart_screen.dart';
 
 // Purpose: Display user profile information
-// Responsibilities: Show user details, provide logout functionality, navigate to cart
+// Responsibilities: Show user details, provide logout functionality
 // Why this class exists: To provide a dedicated screen for user profile management
 
 class ProfileScreen extends StatefulWidget {
@@ -89,21 +88,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         trailing: Text('#${user.id}'),
                       ),
                     ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  height: 44,
-                  child: OutlinedButton.icon(
-                    icon: const Icon(Icons.shopping_cart_outlined),
-                    label: const Text('View My Cart'),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => CartScreen(userId: user.id)),
-                      );
-                    },
                   ),
                 ),
                 const SizedBox(height: 12),
