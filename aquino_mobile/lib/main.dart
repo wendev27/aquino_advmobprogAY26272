@@ -106,7 +106,7 @@ class MainNavigation extends StatefulWidget {
   final int userId;
 
   // Constructor for MainNavigation
-  const MainNavigation({super.key, this.userId = currentUserId});
+  const MainNavigation({super.key, this.userId = 1});
 
   @override
   State<MainNavigation> createState() => _MainNavigationState();
