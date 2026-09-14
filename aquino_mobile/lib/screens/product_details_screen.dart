@@ -116,7 +116,14 @@ class ProductDetailsScreen extends StatelessWidget {
                         final cartProvider = Provider.of<CartProvider>(context, listen: false);
                         cartProvider.addToCart(product);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Added to cart')),
+                          const SnackBar(
+                            content: Text('Added to cart'),
+                            behavior: SnackBarBehavior.floating,
+                            margin: EdgeInsets.fromLTRB(24, 0, 24, 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(16)),
+                            ),
+                          ),
                         );
                       },
                       style: ElevatedButton.styleFrom(
