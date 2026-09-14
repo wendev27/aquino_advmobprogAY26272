@@ -5,6 +5,8 @@ import '../models/product.dart';
 
 class ProductService {
   Future<List<Product>> getAllProducts() async {
+    // Handles the API request and turns the response into Product objects
+    // before passing the data back to the screen.
     final response = await http.get(Uri.parse('$host/products'));
     if (response.statusCode == 200) {
       final Map<String, dynamic> data = jsonDecode(response.body);

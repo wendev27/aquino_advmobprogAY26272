@@ -68,6 +68,8 @@ class _ProductScreenState extends State<ProductScreen> {
               ),
             ),
             const SizedBox(height: 16),
+            // FutureBuilder handles loading, error, and loaded states while
+            // the product request is running.
             FutureBuilder<List<Product>>(
               future: _productsFuture,
               builder: (context, snapshot) {

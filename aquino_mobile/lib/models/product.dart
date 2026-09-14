@@ -48,6 +48,8 @@ class Product {
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
+    // Converts the API response into a Product object so the UI can work
+    // with structured data instead of reading raw JSON everywhere.
     return Product(
       id: json['id'],
       title: json['title'],

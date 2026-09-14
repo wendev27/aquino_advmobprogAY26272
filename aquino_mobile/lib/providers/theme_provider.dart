@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ThemeProvider with ChangeNotifier {
+  // Keeps the theme state in one place so listening widgets can update
+  // whenever light or dark mode changes.
   bool _isDark = false;
 
   bool get isDark => _isDark;
