@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'constants.dart';
+import 'firebase_options.dart';
 import 'providers/theme_provider.dart';
 import 'providers/counter_provider.dart';
 import 'providers/cart_provider.dart';
@@ -18,9 +20,15 @@ import 'screens/signin_screen.dart';
 // Why this file exists: To bootstrap the application with all necessary configurations
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   // Load environment variables from .env file
   await dotenv.load(fileName: ".env");
-  
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   // Run the Flutter app
   runApp(const MyApp());
 }
@@ -57,10 +65,10 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             // App title
             title: 'Lab Activity',
-            
+
             // Debug banner disabled for cleaner look
             debugShowCheckedModeBanner: false,
-            
+
             // Theme configuration based on ThemeProvider
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
@@ -69,7 +77,7 @@ class MyApp extends StatelessWidget {
               ),
               useMaterial3: true,
             ),
-            
+
             darkTheme: ThemeData(
               colorScheme: ColorScheme.fromSeed(
                 seedColor: Colors.blue,
@@ -77,11 +85,11 @@ class MyApp extends StatelessWidget {
               ),
               useMaterial3: true,
             ),
-            
+
             // The current theme mode comes from provider state, so changing it
             // updates the whole app without manually passing a value through widgets.
             themeMode: themeProvider.themeMode,
-            
+
             // The app starts at the splash screen to check whether the user is
             // already logged in before showing the protected parts of the app.
             initialRoute: '/splash',
@@ -148,7 +156,7 @@ class _MainNavigationState extends State<MainNavigation> {
     return Scaffold(
       // Display the current screen based on selected tab
       body: _screens[_currentIndex],
-      
+
       // Bottom navigation bar
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,

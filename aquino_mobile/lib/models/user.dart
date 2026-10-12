@@ -12,6 +12,9 @@ class User {
   final String image;
   final String accessToken;
   final String refreshToken;
+  final int? age;
+  final String contactNo;
+  final String provider;
 
   User({
     required this.id,
@@ -23,19 +26,25 @@ class User {
     required this.image,
     required this.accessToken,
     required this.refreshToken,
+    this.age,
+    this.contactNo = '',
+    this.provider = 'dummyJson',
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'] ?? 0,
-      username: json['username'] ?? '',
-      email: json['email'] ?? '',
-      firstName: json['firstName'] ?? '',
-      lastName: json['lastName'] ?? '',
-      gender: json['gender'] ?? '',
-      image: json['image'] ?? '',
-      accessToken: json['accessToken'] ?? json['token'] ?? '',
-      refreshToken: json['refreshToken'] ?? '',
+      id: _asInt(json['id']) ?? 0,
+      username: '${json['username'] ?? ''}',
+      email: '${json['email'] ?? ''}',
+      firstName: '${json['firstName'] ?? ''}',
+      lastName: '${json['lastName'] ?? ''}',
+      gender: '${json['gender'] ?? ''}',
+      image: '${json['image'] ?? ''}',
+      accessToken: '${json['accessToken'] ?? json['token'] ?? ''}',
+      refreshToken: '${json['refreshToken'] ?? ''}',
+      age: _asInt(json['age']),
+      contactNo: '${json['contactNo'] ?? json['phone'] ?? ''}',
+      provider: '${json['provider'] ?? 'dummyJson'}',
     );
   }
 
@@ -50,8 +59,16 @@ class User {
       'image': image,
       'accessToken': accessToken,
       'refreshToken': refreshToken,
+      'age': age,
+      'contactNo': contactNo,
+      'provider': provider,
     };
   }
 
   String get fullName => '$firstName $lastName'.trim();
+
+  static int? _asInt(dynamic value) {
+    if (value is int) return value;
+    return int.tryParse('$value');
+  }
 }
