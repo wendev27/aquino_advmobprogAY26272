@@ -30,17 +30,38 @@ class ChatService {
 
   Stream<List<ChatUser>> watchUsers() {
     final currentUser = _requireFirebaseUser();
-    return _firestore.collection('Users').snapshots().map((snapshot) {
-      final users = snapshot.docs
-          .map(ChatUser.fromDocument)
-          .where((user) => user.uid != currentUser.uid)
-          .where((user) => user.email.isNotEmpty)
-          .toList();
-      users.sort((a, b) => a.displayName.toLowerCase().compareTo(
-            b.displayName.toLowerCase(),
-          ));
-      return users;
-    });
+    final users = _firestore.collection('Users');
+    return _watchUsers(users, currentUser.uid);
+  }
+
+  Stream<List<ChatUser>> _watchUsers(
+    CollectionReference<Map<String, dynamic>> users,
+    String currentUid,
+  ) async* {
+    // Fetch once so the list can render even if the web listener takes time
+    // to establish. The snapshots stream then keeps it live.
+    final initialSnapshot =
+        await users.get().timeout(const Duration(seconds: 10));
+    yield _mapUsers(initialSnapshot, currentUid);
+
+    await for (final snapshot in users.snapshots()) {
+      yield _mapUsers(snapshot, currentUid);
+    }
+  }
+
+  List<ChatUser> _mapUsers(
+    QuerySnapshot<Map<String, dynamic>> snapshot,
+    String currentUid,
+  ) {
+    final users = snapshot.docs
+        .map(ChatUser.fromDocument)
+        .where((user) => user.uid != currentUid)
+        .where((user) => user.email.isNotEmpty)
+        .toList();
+    users.sort((a, b) => a.displayName.toLowerCase().compareTo(
+          b.displayName.toLowerCase(),
+        ));
+    return users;
   }
 
   Future<String?> findUidByEmail(String email) async {

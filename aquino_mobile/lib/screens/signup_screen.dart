@@ -88,7 +88,7 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             const SizedBox(height: 4),
             const Text(
-                'Your extra profile fields are saved locally on this device.'),
+                'Your profile is saved in Firebase and cached locally on this device.'),
             const SizedBox(height: 20),
             _field(_firstName, 'First name', validator: _required),
             _field(_lastName, 'Last name', validator: _required),
