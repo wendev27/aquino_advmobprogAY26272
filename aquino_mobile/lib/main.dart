@@ -14,6 +14,7 @@ import 'screens/cart_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/signin_screen.dart';
+import 'screens/chat_list_screen.dart';
 
 // Purpose: Entry point of the Flutter application
 // Responsibilities: Initialize app, set up providers, and configure theme
@@ -106,6 +107,7 @@ class MyApp extends StatelessWidget {
                 return MainNavigation(userId: userId);
               },
               '/settings': (context) => const SettingsScreen(),
+              '/chat-list': (context) => const ChatListScreen(),
             },
           );
         },
@@ -156,6 +158,13 @@ class _MainNavigationState extends State<MainNavigation> {
     return Scaffold(
       // Display the current screen based on selected tab
       body: _screens[_currentIndex],
+
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Navigator.pushNamed(context, '/chat-list'),
+        icon: const Icon(Icons.chat_bubble_outline),
+        label: const Text('Chats'),
+        tooltip: 'Open chats',
+      ),
 
       // Bottom navigation bar
       bottomNavigationBar: BottomNavigationBar(

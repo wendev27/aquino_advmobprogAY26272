@@ -8,8 +8,9 @@ The current project folder is `aquino_mobile`, and it follows the lab progressio
 - `lab-act3`: cart model, cart service, cart screen, add-to-cart flow
 - `lab-act4`: DummyJSON user authentication, persistence, splash flow, profile/logout
 - `lab-act5`: DummyJSON and Firebase Authentication, signup, account management
+- `lab-act6`: Firestore-backed Firebase profiles and real-time private chat
 
-The active branch is `lab-act5`, which includes Lab 2, 3, 4, and 5 features together.
+The active branch is `lab-act6`, which includes Lab 2, 3, 4, 5, and 6 features together.
 
 For the full study guide, see [aquino_mobile/README.md](aquino_mobile/README.md) and [aquino_mobile/docs/LAB_ACTIVITIES_WALKTHROUGH.md](aquino_mobile/docs/LAB_ACTIVITIES_WALKTHROUGH.md).
 
@@ -48,3 +49,25 @@ Firebase sign-in uses `FirebaseAuth.signInWithEmailAndPassword()` with an email 
 Firebase Authentication gives the app SDK-based email/password authentication, Firebase-managed authentication state and token handling, duplicate-email and weak-password errors, display-name updates, reauthentication before password changes, and account deletion. These operations are more appropriate for real account management than the DummyJSON demo login endpoint. Both providers can coexist because `LoginType` keeps their distinct credentials, errors, sessions, and user data behavior separate.
 
 The current implementation stores Firebase's extra profile fields in local `SharedPreferences`; it does not claim to use Firestore or Realtime Database, and deleting a Firebase Auth account does not delete any remote profile record. Email/Password must be enabled manually in Firebase Console: open the `advmobprog-firebase-4c5b8` project, go to **Build → Authentication → Sign-in method**, select **Email/Password**, enable it, and save. The Android and Web app configuration files are already present in this repository.
+
+## Lab Activity 6: Discussion
+
+### 1. How is Firebase profile data persisted?
+
+Firebase Authentication remains responsible for identity, email, password, and authentication state. The app now stores the non-secret profile fields in Firestore under `Users/{firebaseUid}`. The document contains the UID, email, username, display name, first and last names, age, contact number, image, and server timestamps; it never stores a password or token. The existing UID-scoped `SharedPreferences` record is retained as an offline fallback so Firebase signup, login, and profile viewing do not stop working when Firestore has not been provisioned or is temporarily unavailable. On login, a Firestore document is used to restore the profile; older accounts are backfilled from their UID-scoped local record.
+
+DummyJSON users continue to use their API token and local active session. They are not written to the Firebase `Users` collection, and the chat UI refuses to treat a DummyJSON numeric ID as a Firebase UID.
+
+### 2. How does the chat workflow work?
+
+The main navigation includes a **Chats** floating action button. A Firebase-authenticated user opens a real-time directory of other Firebase users from the `Users` collection and can filter it by name, username, or email. Selecting a user opens the chat detail screen. A room ID is created deterministically from the two Firebase UIDs, so both participants read the same room. Messages are stored in `chat_rooms/{roomId}/messages` with sender and receiver UIDs, text, a server timestamp, and a basic status, then displayed through a Firestore snapshot stream in chronological order.
+
+Self-chat is rejected, messages are limited to 2,000 characters, and the receiver is identified by Firebase UID rather than by a DummyJSON ID or an email-only guess. If the current session is DummyJSON, the chat screen explains that a Firebase account is required.
+
+### 3. What security rules and setup are required?
+
+The proposed rules are in [`aquino_mobile/firestore.rules`](aquino_mobile/firestore.rules). They require Firebase Authentication for profile reads, allow a user to create/update/delete only their own `Users/{uid}` document, and allow chat-room and message access only to the two room participants. Message creation requires the authenticated sender UID, a different receiver UID in the room, non-empty text, and the `sent` status. The rules file is included for review but was not deployed automatically; create the Firestore database in the `advmobprog-firebase-4c5b8` Firebase Console project, choose its region, paste/review these rules in the Rules tab, and publish them before testing chat.
+
+### 4. What was preserved from the previous activities?
+
+The existing FlutterFire initialization, Firebase email/password signup and login, username update, password-change reauthentication, account-deletion reauthentication, logout behavior, DummyJSON login, product loading, cart flow, provider selection, and UI remain in place. Firestore is an additional persistence and messaging layer; it does not replace Firebase Authentication or the DummyJSON demo provider.

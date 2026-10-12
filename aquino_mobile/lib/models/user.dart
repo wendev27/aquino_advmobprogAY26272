@@ -15,6 +15,7 @@ class User {
   final int? age;
   final String contactNo;
   final String provider;
+  final String uid;
 
   User({
     required this.id,
@@ -29,6 +30,7 @@ class User {
     this.age,
     this.contactNo = '',
     this.provider = 'dummyJson',
+    this.uid = '',
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -45,6 +47,7 @@ class User {
       age: _asInt(json['age']),
       contactNo: '${json['contactNo'] ?? json['phone'] ?? ''}',
       provider: '${json['provider'] ?? 'dummyJson'}',
+      uid: '${json['uid'] ?? ''}',
     );
   }
 
@@ -62,6 +65,7 @@ class User {
       'age': age,
       'contactNo': contactNo,
       'provider': provider,
+      'uid': uid,
     };
   }
 
