@@ -16,6 +16,8 @@ enum LoginType { dummyJson, firebase }
 /// Firebase profile fields are persisted in Firestore, with the existing
 /// UID-scoped SharedPreferences entry retained as an offline fallback.
 class UserService {
+  static const _firestoreOperationTimeout = Duration(seconds: 8);
+
   static const _activeSessionKeys = [
     'id',
     'username',
@@ -61,7 +63,7 @@ class UserService {
           await _saveFirebaseUser(user);
           await _syncFirestoreProfile(user, prefs: prefs);
           await _saveFirebaseUser(user, prefs: prefs);
-          return getUserData();
+          return getUserData(syncRemote: false);
         } on firebase_auth.FirebaseAuthException catch (error) {
           throw Exception(_firebaseErrorMessage(error));
         }
@@ -152,7 +154,7 @@ class UserService {
       await _saveFirebaseUser(user, prefs: prefs);
       await _syncFirestoreProfile(user, prefs: prefs);
       await _saveFirebaseUser(user, prefs: prefs);
-      return getUserData();
+      return getUserData(syncRemote: false);
     } on firebase_auth.FirebaseAuthException catch (error) {
       throw Exception(_firebaseErrorMessage(error));
     }
@@ -295,10 +297,10 @@ class UserService {
     await prefs.setString('token', '$token');
   }
 
-  Future<Map<String, dynamic>> getUserData() async {
+  Future<Map<String, dynamic>> getUserData({bool syncRemote = true}) async {
     final prefs = await SharedPreferences.getInstance();
     final type = await _getLoginType(prefs: prefs);
-    if (type == LoginType.firebase && _firebaseIsReady) {
+    if (syncRemote && type == LoginType.firebase && _firebaseIsReady) {
       final firebaseUser = _firebaseAuth.currentUser;
       if (firebaseUser != null) {
         await _syncFirestoreProfile(firebaseUser, prefs: prefs);
@@ -428,29 +430,38 @@ class UserService {
     firebase_auth.User user, {
     required SharedPreferences prefs,
   }) async {
-    final localProfile = _readFirebaseProfile(prefs, user.uid);
     try {
-      final remoteProfile = await _firestoreProfileService.getProfile(user.uid);
-      if (remoteProfile != null) {
-        await _writeFirebaseProfile(user, remoteProfile, prefs: prefs);
-      } else if (localProfile != null) {
-        await _persistFirestoreProfile(user, prefs: prefs);
-      } else {
-        final displayParts =
-            (user.displayName ?? '').trim().split(RegExp(r'\s+'));
-        await _firestoreProfileService.upsertProfile(
-          uid: user.uid,
-          email: user.email ?? '',
-          username: '',
-          firstName: displayParts.isEmpty ? '' : displayParts.first,
-          lastName:
-              displayParts.length > 1 ? displayParts.sublist(1).join(' ') : '',
-          contactNo: '',
-        );
-      }
+      await _syncFirestoreProfileWithoutTimeout(user, prefs: prefs).timeout(
+        _firestoreOperationTimeout,
+      );
     } catch (_) {
-      // Authentication remains usable when Firestore is offline or has not
-      // been created yet; the UID-scoped local cache remains available.
+      // Authentication remains usable when Firestore is offline, slow, or
+      // has not been created yet; the UID-scoped local cache remains usable.
+    }
+  }
+
+  Future<void> _syncFirestoreProfileWithoutTimeout(
+    firebase_auth.User user, {
+    required SharedPreferences prefs,
+  }) async {
+    final localProfile = _readFirebaseProfile(prefs, user.uid);
+    final remoteProfile = await _firestoreProfileService.getProfile(user.uid);
+    if (remoteProfile != null) {
+      await _writeFirebaseProfile(user, remoteProfile, prefs: prefs);
+    } else if (localProfile != null) {
+      await _persistFirestoreProfile(user, prefs: prefs);
+    } else {
+      final displayParts =
+          (user.displayName ?? '').trim().split(RegExp(r'\s+'));
+      await _firestoreProfileService.upsertProfile(
+        uid: user.uid,
+        email: user.email ?? '',
+        username: '',
+        firstName: displayParts.isEmpty ? '' : displayParts.first,
+        lastName:
+            displayParts.length > 1 ? displayParts.sublist(1).join(' ') : '',
+        contactNo: '',
+      );
     }
   }
 
@@ -461,18 +472,22 @@ class UserService {
     final profile =
         _readFirebaseProfile(prefs, user.uid) ?? <String, dynamic>{};
     final ageValue = profile['age'];
-    await _firestoreProfileService.upsertProfile(
-      uid: user.uid,
-      email: user.email ?? prefs.getString('email') ?? '',
-      username: '${profile['username'] ?? prefs.getString('username') ?? ''}',
-      firstName:
-          '${profile['firstName'] ?? prefs.getString('firstName') ?? ''}',
-      lastName: '${profile['lastName'] ?? prefs.getString('lastName') ?? ''}',
-      age: ageValue is int ? ageValue : int.tryParse('$ageValue'),
-      contactNo:
-          '${profile['contactNo'] ?? prefs.getString('contactNo') ?? ''}',
-      image: '${profile['image'] ?? prefs.getString('image') ?? ''}',
-    );
+    await _firestoreProfileService
+        .upsertProfile(
+          uid: user.uid,
+          email: user.email ?? prefs.getString('email') ?? '',
+          username:
+              '${profile['username'] ?? prefs.getString('username') ?? ''}',
+          firstName:
+              '${profile['firstName'] ?? prefs.getString('firstName') ?? ''}',
+          lastName:
+              '${profile['lastName'] ?? prefs.getString('lastName') ?? ''}',
+          age: ageValue is int ? ageValue : int.tryParse('$ageValue'),
+          contactNo:
+              '${profile['contactNo'] ?? prefs.getString('contactNo') ?? ''}',
+          image: '${profile['image'] ?? prefs.getString('image') ?? ''}',
+        )
+        .timeout(_firestoreOperationTimeout);
   }
 
   Future<void> _clearActiveSession(SharedPreferences prefs) async {
