@@ -54,7 +54,7 @@ The current implementation stores Firebase's extra profile fields in local `Shar
 
 ### 1. How is Firebase profile data persisted?
 
-Firebase Authentication remains responsible for identity, email, password, and authentication state. The app now stores the non-secret profile fields in Firestore under `Users/{firebaseUid}`. The document contains the UID, email, username, display name, first and last names, age, contact number, image, and server timestamps; it never stores a password or token. The existing UID-scoped `SharedPreferences` record is retained as an offline fallback so Firebase signup, login, and profile viewing do not stop working when Firestore has not been provisioned or is temporarily unavailable. On login, a Firestore document is used to restore the profile; older accounts are backfilled from their UID-scoped local record.
+Firebase Authentication remains responsible for identity, email, password, and authentication state. The app now stores the public chat-directory fields in Firestore under `Users/{firebaseUid}`. A self-readable `Users/{firebaseUid}/private/profile` subdocument stores age and contact number; neither document stores a password or token. The existing UID-scoped `SharedPreferences` record is retained as an offline fallback so Firebase signup, login, and profile viewing do not stop working when Firestore has not been provisioned or is temporarily unavailable. On login, Firestore documents are used to restore the profile; older accounts are backfilled from their UID-scoped local record.
 
 DummyJSON users continue to use their API token and local active session. They are not written to the Firebase `Users` collection, and the chat UI refuses to treat a DummyJSON numeric ID as a Firebase UID.
 
@@ -66,7 +66,7 @@ Self-chat is rejected, messages are limited to 2,000 characters, and the receive
 
 ### 3. What security rules and setup are required?
 
-The proposed rules are in [`aquino_mobile/firestore.rules`](aquino_mobile/firestore.rules). They require Firebase Authentication for profile reads, allow a user to create/update/delete only their own `Users/{uid}` document, and allow chat-room and message access only to the two room participants. Message creation requires the authenticated sender UID, a different receiver UID in the room, non-empty text, and the `sent` status. The rules file is included for review but was not deployed automatically; create the Firestore database in the `advmobprog-firebase-4c5b8` Firebase Console project, choose its region, paste/review these rules in the Rules tab, and publish them before testing chat.
+The proposed rules are in [`aquino_mobile/firestore.rules`](aquino_mobile/firestore.rules). They require Firebase Authentication for public directory reads, allow a user to create/update/delete only their own profile documents, and allow chat-room and message access only to the two room participants. Age and contact data are restricted to the profile owner. Message creation requires the authenticated sender UID, a different receiver UID in the room, non-empty text, and the `sent` status. The rules file is included for review but was not deployed automatically; create the Firestore database in the `advmobprog-firebase-4c5b8` Firebase Console project, choose its region, paste/review these rules in the Rules tab, and publish them before testing chat.
 
 ### 4. What was preserved from the previous activities?
 

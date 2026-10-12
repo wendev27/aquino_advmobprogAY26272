@@ -19,10 +19,19 @@ class FirestoreProfileService {
   CollectionReference<Map<String, dynamic>> get _users =>
       _firestore.collection('Users');
 
+  DocumentReference<Map<String, dynamic>> _privateProfile(String uid) =>
+      _users.doc(uid).collection('private').doc('profile');
+
   Future<Map<String, dynamic>?> getProfile(String uid) async {
     final snapshot = await _users.doc(uid).get();
     if (!snapshot.exists || snapshot.data() == null) return null;
-    return <String, dynamic>{'uid': uid, ...snapshot.data()!};
+    final privateSnapshot = await _privateProfile(uid).get();
+    return <String, dynamic>{
+      'uid': uid,
+      ...snapshot.data()!,
+      if (privateSnapshot.exists && privateSnapshot.data() != null)
+        ...privateSnapshot.data()!,
+    };
   }
 
   Future<void> upsertProfile({
@@ -42,20 +51,27 @@ class FirestoreProfileService {
 
     final reference = _users.doc(uid);
     final existing = await reference.get();
-    final data = <String, dynamic>{
+    final publicData = <String, dynamic>{
       'uid': uid,
       'email': email.trim(),
       'username': username.trim(),
       'displayName': '${firstName.trim()} ${lastName.trim()}'.trim(),
       'firstName': firstName.trim(),
       'lastName': lastName.trim(),
-      'contactNo': contactNo.trim(),
       'image': image,
       'updatedAt': FieldValue.serverTimestamp(),
     };
-    if (age != null) data['age'] = age;
-    if (!existing.exists) data['createdAt'] = FieldValue.serverTimestamp();
-    await reference.set(data, SetOptions(merge: true));
+    if (!existing.exists) {
+      publicData['createdAt'] = FieldValue.serverTimestamp();
+    }
+    final privateData = <String, dynamic>{
+      'uid': uid,
+      'contactNo': contactNo.trim(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+    if (age != null) privateData['age'] = age;
+    await reference.set(publicData, SetOptions(merge: true));
+    await _privateProfile(uid).set(privateData, SetOptions(merge: true));
   }
 
   Future<void> deleteProfile(String uid) async {
@@ -63,6 +79,9 @@ class FirestoreProfileService {
     if (currentUser == null || currentUser.uid != uid) {
       throw StateError('A matching Firebase user must be signed in.');
     }
-    await _users.doc(uid).delete();
+    final batch = _firestore.batch();
+    batch.delete(_privateProfile(uid));
+    batch.delete(_users.doc(uid));
+    await batch.commit();
   }
 }

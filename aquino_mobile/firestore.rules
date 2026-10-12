@@ -27,6 +27,12 @@ service cloud.firestore {
         && request.resource.data.uid == uid
         && request.resource.data.email == request.auth.token.email;
       allow delete: if isSelf(uid);
+
+      match /private/{privateId} {
+        allow read: if isSelf(uid) && privateId == 'profile';
+        allow create, update: if isSelf(uid) && privateId == 'profile';
+        allow delete: if isSelf(uid) && privateId == 'profile';
+      }
     }
 
     match /chat_rooms/{roomId} {
