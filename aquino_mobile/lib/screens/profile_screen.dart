@@ -125,28 +125,55 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _deleteAccount() async {
-    final confirmed = await showDialog<bool>(
+    final passwordController = TextEditingController();
+    final currentPassword = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete account?'),
-        content: const Text(
-          'This removes the signed-in Firebase account. Local profile data will also be cleared.',
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel')),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
+      builder: (context) {
+        var hasPassword = false;
+        return StatefulBuilder(
+          builder: (context, setDialogState) => AlertDialog(
+            title: const Text('Delete account?'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'This permanently removes the signed-in Firebase account and its saved local profile. Enter your current password to confirm.',
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: passwordController,
+                  obscureText: true,
+                  onChanged: (value) => setDialogState(
+                    () => hasPassword = value.isNotEmpty,
+                  ),
+                  decoration: const InputDecoration(
+                    labelText: 'Current password',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                onPressed: hasPassword
+                    ? () => Navigator.pop(context, passwordController.text)
+                    : null,
+                child: const Text('Delete'),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
-    if (confirmed != true) return;
+    passwordController.dispose();
+    if (currentPassword == null) return;
     try {
-      await _userService.deleteAccount();
+      await _userService.deleteAccount(currentPassword: currentPassword);
       if (!mounted) return;
       Navigator.pushNamedAndRemoveUntil(context, '/signin', (route) => false);
     } catch (error) {

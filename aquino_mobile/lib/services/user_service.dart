@@ -14,6 +14,23 @@ enum LoginType { dummyJson, firebase }
 /// DummyJSON remains API/token based. Firebase uses the FirebaseAuth SDK.
 /// Extra Firebase profile fields are local because this project has no database.
 class UserService {
+  static const _activeSessionKeys = [
+    'id',
+    'username',
+    'email',
+    'firstName',
+    'lastName',
+    'gender',
+    'image',
+    'accessToken',
+    'refreshToken',
+    'token',
+    'age',
+    'contactNo',
+    'uid',
+    'loginType',
+  ];
+
   firebase_auth.FirebaseAuth get _firebaseAuth =>
       firebase_auth.FirebaseAuth.instance;
 
@@ -63,6 +80,9 @@ class UserService {
       if (response.statusCode == 200) {
         final data = Map<String, dynamic>.from(jsonDecode(response.body));
         data['provider'] = LoginType.dummyJson.name;
+        if (_firebaseIsReady && _firebaseAuth.currentUser != null) {
+          await _firebaseAuth.signOut();
+        }
         await saveUserData(data);
         return data;
       }
@@ -112,13 +132,20 @@ class UserService {
       if (user == null) throw Exception('Firebase returned no user.');
       await user.updateDisplayName('$firstName $lastName'.trim());
       final prefs = await SharedPreferences.getInstance();
+      await _clearActiveSession(prefs);
       await prefs.setString('loginType', LoginType.firebase.name);
-      await prefs.setString('username', username.trim());
-      await prefs.setString('firstName', firstName.trim());
-      await prefs.setString('lastName', lastName.trim());
-      await prefs.setInt('age', age);
-      await prefs.setString('contactNo', contactNo.trim());
-      await _saveFirebaseUser(user);
+      await _writeFirebaseProfile(
+        user,
+        {
+          'username': username.trim(),
+          'firstName': firstName.trim(),
+          'lastName': lastName.trim(),
+          'age': age,
+          'contactNo': contactNo.trim(),
+        },
+        prefs: prefs,
+      );
+      await _saveFirebaseUser(user, prefs: prefs);
       return getUserData();
     } on firebase_auth.FirebaseAuthException catch (error) {
       throw Exception(_firebaseErrorMessage(error));
@@ -126,12 +153,11 @@ class UserService {
   }
 
   Future<void> signOut({LoginType? loginType}) async {
-    final activeType = loginType ?? await _getLoginType();
-    if (activeType == LoginType.firebase && _firebaseIsReady) {
+    if (_firebaseIsReady && _firebaseAuth.currentUser != null) {
       await _firebaseAuth.signOut();
     }
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    await _clearActiveSession(prefs);
   }
 
   Future<void> logout() => signOut();
@@ -140,31 +166,64 @@ class UserService {
     final value = username.trim();
     if (value.isEmpty) throw const FormatException('Username is required.');
     final type = await _getLoginType();
+    final prefs = await SharedPreferences.getInstance();
     if (type == LoginType.firebase) {
       _ensureFirebaseReady();
-      if (_firebaseAuth.currentUser == null) {
+      final user = _firebaseAuth.currentUser;
+      if (user == null) {
         throw Exception('No Firebase user is signed in.');
       }
-      await _firebaseAuth.currentUser!.updateDisplayName(value);
+      await user.updateDisplayName(value);
+      await _writeFirebaseProfile(
+        user,
+        {
+          'username': value,
+          'firstName': prefs.getString('firstName') ?? '',
+          'lastName': prefs.getString('lastName') ?? '',
+          'age': prefs.getInt('age'),
+          'contactNo': prefs.getString('contactNo') ?? '',
+        },
+        prefs: prefs,
+      );
+      await prefs.setString('username', value);
+      return;
     }
-    final prefs = await SharedPreferences.getInstance();
     await prefs.setString('username', value);
   }
 
   Future<void> deleteAccount({String? currentPassword}) async {
     final type = await _getLoginType();
-    if (type == LoginType.firebase) {
-      _ensureFirebaseReady();
-      final user = _firebaseAuth.currentUser;
-      if (user == null) throw Exception('No Firebase user is signed in.');
-      try {
-        await user.delete();
-      } on firebase_auth.FirebaseAuthException catch (error) {
-        throw Exception(_firebaseErrorMessage(error));
+    if (type != LoginType.firebase) {
+      throw Exception('DummyJSON does not support account deletion.');
+    }
+    if (currentPassword == null || currentPassword.isEmpty) {
+      throw const FormatException('Current password is required.');
+    }
+
+    _ensureFirebaseReady();
+    final user = _firebaseAuth.currentUser;
+    final email = user?.email;
+    if (user == null || email == null) {
+      throw Exception('No Firebase user is signed in.');
+    }
+
+    try {
+      final credential = firebase_auth.EmailAuthProvider.credential(
+        email: email,
+        password: currentPassword,
+      );
+      await user.reauthenticateWithCredential(credential);
+      await user.delete();
+    } on firebase_auth.FirebaseAuthException catch (error) {
+      if (error.code == 'wrong-password' ||
+          error.code == 'invalid-credential') {
+        throw Exception('Incorrect current password.');
       }
+      throw Exception(_firebaseErrorMessage(error));
     }
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    await prefs.remove(_firebaseProfileKey(user.uid));
+    await _clearActiveSession(prefs);
   }
 
   Future<void> resetPasswordFromCurrentPassword({
@@ -201,6 +260,7 @@ class UserService {
   Future<void> saveUserData(Map<String, dynamic> userData) async {
     final prefs = await SharedPreferences.getInstance();
     final user = User.fromJson(userData);
+    await _clearActiveSession(prefs);
     await prefs.setInt('id', user.id);
     await prefs.setString('username', user.username);
     await prefs.setString('email', user.email);
@@ -213,6 +273,7 @@ class UserService {
     await prefs.setString('loginType', user.provider);
     await prefs.setString('contactNo', user.contactNo);
     if (user.age != null) await prefs.setInt('age', user.age!);
+    await prefs.remove('uid');
     final token = userData['token'] ?? user.accessToken;
     await prefs.setString('token', '$token');
   }
@@ -276,11 +337,18 @@ class UserService {
     SharedPreferences? prefs,
   }) async {
     final storage = prefs ?? await SharedPreferences.getInstance();
+    final profile = _readFirebaseProfile(storage, user.uid);
     final displayParts = (user.displayName ?? '').trim().split(RegExp(r'\s+'));
-    final storedFirstName = storage.getString('firstName') ?? '';
-    final storedLastName = storage.getString('lastName') ?? '';
+    final storedFirstName =
+        '${profile?['firstName'] ?? storage.getString('firstName') ?? ''}';
+    final storedLastName =
+        '${profile?['lastName'] ?? storage.getString('lastName') ?? ''}';
+    final storedUsername =
+        '${profile?['username'] ?? storage.getString('username') ?? ''}';
     await storage.setInt('id', 0);
+    await storage.setString('uid', user.uid);
     await storage.setString('email', user.email ?? '');
+    await storage.setString('username', storedUsername);
     await storage.setString(
       'firstName',
       storedFirstName.isNotEmpty
@@ -293,7 +361,51 @@ class UserService {
           ? storedLastName
           : (displayParts.length > 1 ? displayParts.sublist(1).join(' ') : ''),
     );
+    final age = profile?['age'];
+    if (age is int) {
+      await storage.setInt('age', age);
+    } else {
+      await storage.remove('age');
+    }
+    await storage.setString('contactNo', '${profile?['contactNo'] ?? ''}');
     await storage.setString('loginType', LoginType.firebase.name);
+  }
+
+  String _firebaseProfileKey(String uid) => 'firebase_profile_$uid';
+
+  Map<String, dynamic>? _readFirebaseProfile(
+    SharedPreferences prefs,
+    String uid,
+  ) {
+    final raw = prefs.getString(_firebaseProfileKey(uid));
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      final decoded = jsonDecode(raw);
+      return decoded is Map<String, dynamic>
+          ? decoded
+          : Map<String, dynamic>.from(decoded as Map);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _writeFirebaseProfile(
+    firebase_auth.User user,
+    Map<String, dynamic> values, {
+    SharedPreferences? prefs,
+  }) async {
+    final storage = prefs ?? await SharedPreferences.getInstance();
+    final profile =
+        _readFirebaseProfile(storage, user.uid) ?? <String, dynamic>{};
+    profile.addAll(values);
+    profile['uid'] = user.uid;
+    await storage.setString(_firebaseProfileKey(user.uid), jsonEncode(profile));
+  }
+
+  Future<void> _clearActiveSession(SharedPreferences prefs) async {
+    for (final key in _activeSessionKeys) {
+      await prefs.remove(key);
+    }
   }
 
   void _validateSignup({
