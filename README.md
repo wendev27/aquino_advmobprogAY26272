@@ -66,7 +66,7 @@ Self-chat is rejected, messages are limited to 2,000 characters, and the receive
 
 ### 3. What security rules and setup are required?
 
-The proposed rules are in [`aquino_mobile/firestore.rules`](aquino_mobile/firestore.rules). They require Firebase Authentication for public directory reads, allow a user to create/update/delete only their own profile documents, and allow chat-room and message access only to the two room participants. Age and contact data are restricted to the profile owner. Message creation requires the authenticated sender UID, a different receiver UID in the room, non-empty text, and the `sent` status. The rules file is included for review but was not deployed automatically; create the Firestore database in the `advmobprog-firebase-4c5b8` Firebase Console project, choose its region, paste/review these rules in the Rules tab, and publish them before testing chat.
+The deployed rules are in [`aquino_mobile/firestore.rules`](aquino_mobile/firestore.rules). They require Firebase Authentication for public directory reads, allow a user to create/update/delete only their own profile documents, and allow chat-room and message access only to the two room participants. Age and contact data are restricted to the profile owner. Message creation requires the authenticated sender UID, a different receiver UID, non-empty text, and the `sent` status. These rules were validated and deployed to the `default` Firestore database in the `advmobprog-firebase-4c5b8` project; future deployments use the `firestore.rules` mapping in `aquino_mobile/firebase.json`.
 
 ### 4. What was preserved from the previous activities?
 
