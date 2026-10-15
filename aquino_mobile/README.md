@@ -2,11 +2,13 @@
 
 This Flutter app is my Advanced Mobile Programming project. The code follows the lab progression in the repository branches:
 
-- `lab-act2` contains the product and theme work
-- `lab-act3` adds cart support
-- `lab-act4` adds authentication and persistence
+- `lab_act2` contains the product and theme work
+- `lab_act3` adds cart support
+- `lab_act4` adds authentication and persistence
+- `lab_act5` adds Firebase Authentication and account management
+- `lab_act6` adds Firestore profiles, real-time chat, message status indicators, and chat animations
 
-The current branch is `lab-act4`, so this project includes Lab Activity 2, 3, and 4 logic together.
+The current branch is `lab_act6`, so this project includes Lab Activities 2 through 6 together.
 
 ## Lab Activity 2: Discussion
 

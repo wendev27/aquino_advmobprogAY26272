@@ -89,7 +89,7 @@ class ChatService {
         .collection('messages')
         .orderBy('timestamp')
         .snapshots()
-        .map((snapshot) {
+        .asyncMap((snapshot) async {
       final messages = snapshot.docs.map(ChatMessage.fromDocument).toList();
       messages.sort((a, b) {
         if (a.timestamp == null && b.timestamp == null) return 0;
@@ -97,8 +97,25 @@ class ChatService {
         if (b.timestamp == null) return -1;
         return a.timestamp!.compareTo(b.timestamp!);
       });
+      try {
+        await _markMessagesSeen(snapshot, currentUser.uid);
+      } catch (_) {
+        // Reading the conversation should continue even if a status update
+        // is temporarily unavailable.
+      }
       return messages;
     });
+  }
+
+  Future<void> _markMessagesSeen(
+    QuerySnapshot<Map<String, dynamic>> snapshot,
+    String currentUid,
+  ) async {
+    final updates = snapshot.docs.where((document) {
+      final data = document.data();
+      return data['receiverId'] == currentUid && data['status'] != 'seen';
+    }).map((document) => document.reference.update({'status': 'seen'}));
+    await Future.wait(updates);
   }
 
   Future<void> sendMessage({
@@ -129,7 +146,7 @@ class ChatService {
     };
     await room.set(roomData, SetOptions(merge: true));
 
-    await room.collection('messages').add({
+    final message = await room.collection('messages').add({
       'senderId': currentUser.uid,
       'senderEmail': currentUser.email ?? '',
       'receiverId': recipientUid,
@@ -138,6 +155,9 @@ class ChatService {
       'timestamp': FieldValue.serverTimestamp(),
       'status': 'sent',
     });
+    // A successful Firestore write means the message reached the backend.
+    // The recipient's listener will advance it to seen when it is viewed.
+    await message.update({'status': 'delivered'});
   }
 
   Future<void> _ensureRoom(String currentUid, String recipientUid) async {

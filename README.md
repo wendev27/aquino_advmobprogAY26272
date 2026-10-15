@@ -4,11 +4,11 @@ This repository contains the Flutter project for Advanced Mobile Programming.
 
 The current project folder is `aquino_mobile`, and it follows the lab progression across branches:
 
-- `lab-act2`: product model, API service, list screen, theme provider
-- `lab-act3`: cart model, cart service, cart screen, add-to-cart flow
-- `lab-act4`: DummyJSON user authentication, persistence, splash flow, profile/logout
-- `lab-act5`: DummyJSON and Firebase Authentication, signup, account management
-- `lab-act6`: Firestore-backed Firebase profiles and real-time private chat
+- `lab_act2`: product model, API service, list screen, theme provider
+- `lab_act3`: cart model, cart service, cart screen, add-to-cart flow
+- `lab_act4`: DummyJSON user authentication, persistence, splash flow, profile/logout
+- `lab_act5`: DummyJSON and Firebase Authentication, signup, account management
+- `lab_act6`: Firestore-backed Firebase profiles and real-time private chat
 
 The active branch is `lab-act6`, which includes Lab 2, 3, 4, 5, and 6 features together.
 
@@ -60,13 +60,13 @@ DummyJSON users continue to use their API token and local active session. They a
 
 ### 2. How does the chat workflow work?
 
-The main navigation includes a **Chats** floating action button. A Firebase-authenticated user opens a real-time directory of other Firebase users from the `Users` collection and can filter it by name, username, or email. Selecting a user opens the chat detail screen. A room ID is created deterministically from the two Firebase UIDs, so both participants read the same room. Messages are stored in `chat_rooms/{roomId}/messages` with sender and receiver UIDs, text, a server timestamp, and a basic status, then displayed through a Firestore snapshot stream in chronological order.
+The main navigation includes a **Chats** floating action button. A Firebase-authenticated user opens a real-time directory of other Firebase users from the `Users` collection and can filter it by name, username, or email. Selecting a user opens the chat detail screen. A room ID is created deterministically from the two Firebase UIDs, so both participants read the same room. Messages are stored in `chat_rooms/{roomId}/messages` with sender and receiver UIDs, text, a server timestamp, and a status that progresses from `sent` to `delivered` and then `seen` when the recipient opens the conversation. The chat bubbles use distinct sender/receiver styling with fade-and-slide entry animations.
 
 Self-chat is rejected, messages are limited to 2,000 characters, and the receiver is identified by Firebase UID rather than by a DummyJSON ID or an email-only guess. If the current session is DummyJSON, the chat screen explains that a Firebase account is required.
 
 ### 3. What security rules and setup are required?
 
-The deployed rules are in [`aquino_mobile/firestore.rules`](aquino_mobile/firestore.rules). They require Firebase Authentication for public directory reads, allow a user to create/update/delete only their own profile documents, and allow chat-room and message access only to the two room participants. Age and contact data are restricted to the profile owner. Message creation requires the authenticated sender UID, a different receiver UID, non-empty text, and the `sent` status. These rules were validated and deployed to the `default` Firestore database in the `advmobprog-firebase-4c5b8` project; future deployments use the `firestore.rules` mapping in `aquino_mobile/firebase.json`.
+The deployed rules are in [`aquino_mobile/firestore.rules`](aquino_mobile/firestore.rules). They require Firebase Authentication for public directory reads, allow a user to create/update/delete only their own profile documents, and allow chat-room and message access only to the two room participants. Age and contact data are restricted to the profile owner. Message creation requires the authenticated sender UID, a different receiver UID, non-empty text, and the `sent` status; status updates are limited to `sent`, `delivered`, or `seen` without changing message ownership or content. These rules were validated and deployed to the `default` Firestore database in the `advmobprog-firebase-4c5b8` project; future deployments use the `firestore.rules` mapping in `aquino_mobile/firebase.json`.
 
 ### 4. What was preserved from the previous activities?
 
