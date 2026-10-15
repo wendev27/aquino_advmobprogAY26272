@@ -9,7 +9,6 @@ import 'providers/counter_provider.dart';
 import 'providers/cart_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/settings_screen.dart';
-import 'screens/dual_counter_screen.dart';
 import 'screens/cart_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/splash_screen.dart';
@@ -140,7 +139,6 @@ class _MainNavigationState extends State<MainNavigation> {
     const HomeScreen(),
     CartScreen(userId: widget.userId),
     const ProfileScreen(),
-    const DualCounterScreen(),
     const SettingsScreen(),
   ];
 
@@ -186,11 +184,6 @@ class _MainNavigationState extends State<MainNavigation> {
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profile',
-          ),
-          // Counter tab
-          BottomNavigationBarItem(
-            icon: Icon(Icons.countertops),
-            label: 'Counter',
           ),
           // Settings tab
           BottomNavigationBarItem(
