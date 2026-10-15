@@ -25,12 +25,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _userFuture = _userService.getUserData();
   }
 
-  Future<void> _logout() async {
-    await _userService.signOut();
-    if (!mounted) return;
-    Navigator.pushNamedAndRemoveUntil(context, '/signin', (route) => false);
-  }
-
   Future<void> _editUsername(User user) async {
     final controller = TextEditingController(text: user.username);
     final newUsername = await showDialog<String>(
@@ -124,63 +118,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _deleteAccount() async {
-    final passwordController = TextEditingController();
-    final currentPassword = await showDialog<String>(
-      context: context,
-      builder: (context) {
-        var hasPassword = false;
-        return StatefulBuilder(
-          builder: (context, setDialogState) => AlertDialog(
-            title: const Text('Delete account?'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'This permanently removes the signed-in Firebase account and its saved local profile. Enter your current password to confirm.',
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: passwordController,
-                  obscureText: true,
-                  onChanged: (value) => setDialogState(
-                    () => hasPassword = value.isNotEmpty,
-                  ),
-                  decoration: const InputDecoration(
-                    labelText: 'Current password',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                style: FilledButton.styleFrom(backgroundColor: Colors.red),
-                onPressed: hasPassword
-                    ? () => Navigator.pop(context, passwordController.text)
-                    : null,
-                child: const Text('Delete'),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-    passwordController.dispose();
-    if (currentPassword == null) return;
-    try {
-      await _userService.deleteAccount(currentPassword: currentPassword);
-      if (!mounted) return;
-      Navigator.pushNamedAndRemoveUntil(context, '/signin', (route) => false);
-    } catch (error) {
-      _showError(error);
-    }
-  }
-
   void _showError(Object error) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -267,19 +204,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         builder: (_) => CartScreen(userId: user.id)),
                   ),
                 ),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.logout),
-                  title: const Text('Log out'),
-                  onTap: _logout,
-                ),
-                if (isFirebase)
-                  ListTile(
-                    leading:
-                        const Icon(Icons.delete_forever, color: Colors.red),
-                    title: const Text('Delete account'),
-                    onTap: _deleteAccount,
-                  ),
               ],
             ),
           );
