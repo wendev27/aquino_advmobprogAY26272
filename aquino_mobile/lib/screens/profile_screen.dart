@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../models/user.dart';
 import '../services/user_service.dart';
-import 'cart_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -196,13 +195,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onTap: _changePassword,
                   ),
                 ListTile(
-                  leading: const Icon(Icons.shopping_cart_outlined),
-                  title: const Text('View my cart'),
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => CartScreen(userId: user.id)),
-                  ),
+                  leading: const Icon(Icons.history),
+                  title: const Text('Purchase history'),
+                  onTap: () => Navigator.pushNamed(context, '/order-history'),
                 ),
               ],
             ),
