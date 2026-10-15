@@ -265,7 +265,7 @@ class _MessageStatus extends StatelessWidget {
         ? 'Seen'
         : isDelivered
             ? 'Delivered'
-            : 'Sending…';
+            : 'Sent';
 
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 180),

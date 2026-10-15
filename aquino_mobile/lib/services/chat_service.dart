@@ -98,6 +98,7 @@ class ChatService {
         return a.timestamp!.compareTo(b.timestamp!);
       });
       try {
+        await _markMessagesDelivered(snapshot, currentUser.uid);
         await _markMessagesSeen(snapshot, currentUser.uid);
       } catch (_) {
         // Reading the conversation should continue even if a status update
@@ -115,6 +116,17 @@ class ChatService {
       final data = document.data();
       return data['receiverId'] == currentUid && data['status'] != 'seen';
     }).map((document) => document.reference.update({'status': 'seen'}));
+    await Future.wait(updates);
+  }
+
+  Future<void> _markMessagesDelivered(
+    QuerySnapshot<Map<String, dynamic>> snapshot,
+    String currentUid,
+  ) async {
+    final updates = snapshot.docs.where((document) {
+      final data = document.data();
+      return data['senderId'] == currentUid && data['status'] == 'sent';
+    }).map((document) => document.reference.update({'status': 'delivered'}));
     await Future.wait(updates);
   }
 
