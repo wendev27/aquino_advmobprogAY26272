@@ -69,17 +69,21 @@ class ChatService {
     if (normalizedEmail.isEmpty) return null;
     final snapshot = await _firestore
         .collection('Users')
-        .where('email', isEqualTo: email.trim())
+        .where('email', isEqualTo: normalizedEmail)
         .limit(1)
         .get();
     if (snapshot.docs.isEmpty) return null;
     return snapshot.docs.first.id;
   }
 
-  Stream<List<ChatMessage>> watchMessages(String recipientUid) {
+  Stream<List<ChatMessage>> watchMessages(String recipientUid) async* {
     final currentUser = _requireFirebaseUser();
     final roomId = roomIdFor(currentUser.uid, recipientUid);
-    return _firestore
+    // A new conversation has no room document yet. Create the authorized
+    // participant record before subscribing so Firestore rules can safely
+    // evaluate access to the messages subcollection.
+    await _ensureRoom(currentUser.uid, recipientUid);
+    yield* _firestore
         .collection('chat_rooms')
         .doc(roomId)
         .collection('messages')
@@ -112,7 +116,7 @@ class ChatService {
     }
     final roomId = roomIdFor(currentUser.uid, recipientUid);
     final room = _firestore.collection('chat_rooms').doc(roomId);
-    final existingRoom = await room.get();
+    await _ensureRoom(currentUser.uid, recipientUid);
     final participants = [currentUser.uid, recipientUid]..sort();
     final participantEmails = <String, String>{
       currentUser.uid: currentUser.email ?? '',
@@ -123,9 +127,6 @@ class ChatService {
       'participantEmails': participantEmails,
       'updatedAt': FieldValue.serverTimestamp(),
     };
-    if (!existingRoom.exists) {
-      roomData['createdAt'] = FieldValue.serverTimestamp();
-    }
     await room.set(roomData, SetOptions(merge: true));
 
     await room.collection('messages').add({
@@ -137,6 +138,18 @@ class ChatService {
       'timestamp': FieldValue.serverTimestamp(),
       'status': 'sent',
     });
+  }
+
+  Future<void> _ensureRoom(String currentUid, String recipientUid) async {
+    final roomId = roomIdFor(currentUid, recipientUid);
+    final participants = [currentUid, recipientUid]..sort();
+    await _firestore.collection('chat_rooms').doc(roomId).set(
+      {
+        'participants': participants,
+        'createdAt': FieldValue.serverTimestamp(),
+      },
+      SetOptions(merge: true),
+    );
   }
 
   User _requireFirebaseUser() {
