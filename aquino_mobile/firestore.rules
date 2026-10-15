@@ -33,6 +33,23 @@ service cloud.firestore {
         allow create, update: if isSelf(uid) && privateId == 'profile';
         allow delete: if isSelf(uid) && privateId == 'profile';
       }
+
+      match /cart/{cartId} {
+        allow read, delete: if isSelf(uid) && cartId == 'current';
+        allow create, update: if isSelf(uid)
+          && cartId == 'current'
+          && request.resource.data.items is list;
+      }
+
+      match /orders/{orderId} {
+        allow read: if isSelf(uid);
+        allow create: if isSelf(uid)
+          && request.resource.data.userId == uid
+          && request.resource.data.products is list
+          && request.resource.data.total is number
+          && request.resource.data.status == 'completed';
+        allow update, delete: if false;
+      }
     }
 
     match /chat_rooms/{roomId} {

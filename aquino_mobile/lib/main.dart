@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +16,7 @@ import 'screens/profile_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/signin_screen.dart';
 import 'screens/chat_list_screen.dart';
+import 'screens/order_history_screen.dart';
 
 // Purpose: Entry point of the Flutter application
 // Responsibilities: Initialize app, set up providers, and configure theme
@@ -103,10 +106,19 @@ class MyApp extends StatelessWidget {
                 final userId = args is Map<String, dynamic>
                     ? (args['id'] as int? ?? currentUserId)
                     : currentUserId;
-                return MainNavigation(userId: userId);
+                final uid = args is Map<String, dynamic>
+                    ? '${args['uid'] ?? ''}'.trim()
+                    : '';
+                final accountKey =
+                    uid.isNotEmpty ? 'firebase_$uid' : 'dummy_$userId';
+                return MainNavigation(
+                  userId: userId,
+                  accountKey: accountKey,
+                );
               },
               '/settings': (context) => const SettingsScreen(),
               '/chat-list': (context) => const ChatListScreen(),
+              '/order-history': (context) => const OrderHistoryScreen(),
             },
           );
         },
@@ -121,9 +133,14 @@ class MyApp extends StatelessWidget {
 // Why this class exists: To provide navigation between Home and Settings screens
 class MainNavigation extends StatefulWidget {
   final int userId;
+  final String accountKey;
 
   // Constructor for MainNavigation
-  const MainNavigation({super.key, this.userId = currentUserId});
+  const MainNavigation({
+    super.key,
+    this.userId = currentUserId,
+    this.accountKey = 'dummy_1',
+  });
 
   @override
   State<MainNavigation> createState() => _MainNavigationState();
@@ -141,6 +158,14 @@ class _MainNavigationState extends State<MainNavigation> {
     const ProfileScreen(),
     const SettingsScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(
+      context.read<CartProvider>().initializeForAccount(widget.accountKey),
+    );
+  }
 
   // Handle tab tap
   // Inputs: Index of the tapped tab
